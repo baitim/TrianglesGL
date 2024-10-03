@@ -16,7 +16,7 @@
     write <code>cmake . -B build ; cmake --build build</code> in terminal
 
 4. Run <br>
-    write <code>./build/src/triangles</code> in terminal <br>
+    write <code>./build/src/scene</code> in terminal <br>
 
 <p align="center"><img src="https://github.com/baitim/TrianglesGl/blob/main/images/cat.gif" width="40%"></p>
 
