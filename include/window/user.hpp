@@ -13,10 +13,11 @@ namespace user {
 
     class user_t {
         glm::vec3 user_position_;
-        glm::vec3 user_view_;
-        glm::vec3 user_lookup_;
         glm::vec3 speed_;
-        const float speed_rotate_ = 1.0f;
+
+        float horizontal_angle_   = 0.2 * M_PI;
+        float vertical_angle_     = 1.2 * M_PI;
+        const float speed_rotate_ = M_PI / 100.f;
 
         float aspect_     = 16.0f / 9.0f;
         float z_near_     = 0.1f;
@@ -25,10 +26,10 @@ namespace user {
         const float aspect_zoom_speed_ = 1.1f;
 
     public:
-        user_t(const glm::vec3& user_position, const glm::vec3& user_view,
-               const glm::vec3& user_lookup, const glm::vec3& speed) :
-               user_position_(user_position), user_view_(user_view),
-               user_lookup_  (user_lookup),   speed_(speed) {}
+        user_t(const glm::vec3& user_position, const glm::vec3& speed,
+               float horizontal_angle, float vertical_angle) :
+               user_position_(user_position), speed_(speed),
+               horizontal_angle_(horizontal_angle), vertical_angle_(vertical_angle) {}
 
         window_event_e user_event_callback(const sf::Event& event) {
             switch (event.type) {
@@ -38,7 +39,7 @@ namespace user {
                 case sf::Event::MouseWheelScrolled:
                     switch (real_numbers::is_real_gt(event.mouseWheelScroll.delta, 0.0f)) {
                         case true:
-                            view_angle_ = std::min(150.0f, view_angle_ * aspect_zoom_speed_);
+                            view_angle_ = std::min(80.0f, view_angle_ * aspect_zoom_speed_);
                             break;
 
                         case false:
@@ -69,16 +70,16 @@ namespace user {
                             break;
 
                         case sf::Keyboard::Left:
-                            user_lookup_.x -= speed_rotate_;
+                            horizontal_angle_ -= speed_rotate_;
                             break;
                         case sf::Keyboard::Right:
-                            user_lookup_.x += speed_rotate_;
+                            horizontal_angle_ += speed_rotate_;
                             break;
                         case sf::Keyboard::Down:
-                            user_lookup_.y -= speed_rotate_;
+                            vertical_angle_ -= speed_rotate_;
                             break;
                         case sf::Keyboard::Up:
-                            user_lookup_.y += speed_rotate_;
+                            vertical_angle_ += speed_rotate_;
                             break;
 
                         default:
@@ -93,7 +94,21 @@ namespace user {
         }
 
         inline glm::highp_mat4 get_lookat() const {
-            return glm::lookAt(user_position_, user_view_, user_lookup_);
+            glm::vec3 direction(
+                cos(vertical_angle_) * sin(horizontal_angle_),
+                sin(vertical_angle_),
+                cos(vertical_angle_) * cos(horizontal_angle_)
+            );
+
+            glm::vec3 right = glm::vec3(
+                sin(horizontal_angle_ - M_PI / 2.0f),
+                0,
+                cos(horizontal_angle_ - M_PI / 2.0f)
+            );
+
+            glm::vec3 lookup = glm::cross(right, direction);
+
+            return glm::lookAt(user_position_, user_position_ + direction, lookup);
         }
 
         inline glm::highp_mat4 get_perspective() const {
