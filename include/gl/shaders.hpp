@@ -2,10 +2,15 @@
 
 #include <iostream>
 #include <string>
+#include <cmath>
+#include <vector>
 #include <fstream>
 #include <sstream>
+#include <chrono>
 #include <GL/glew.h>
 #include <GL/glut.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace shaders {
 
@@ -33,8 +38,16 @@ namespace shaders {
 
             GLint result = GL_FALSE;
             glGetShaderiv(shader_id_, GL_COMPILE_STATUS, &result);
-            if (!result)
+            if (!result) {
                 std::cerr << "Error in install shader\n";
+                int info_log_length;
+                glGetShaderiv(shader_id_, GL_INFO_LOG_LENGTH, &info_log_length);
+                if (info_log_length > 0) {
+                    std::vector<char> error_message(info_log_length + 1);
+                    glGetShaderInfoLog(shader_id_, info_log_length, NULL, &error_message[0]);
+                    std::cerr << &error_message[0] << "\n";
+                }
+            }
         }
 
     public:
@@ -48,9 +61,10 @@ namespace shaders {
 
 
     class gl_shaders_program_t final {
-        GLuint vertex_array_id_;
-        GLuint vertex_buffer_;
+        GLuint VAO_;
+        GLuint VBO_;
         GLuint program_id_;
+        std::chrono::time_point<std::chrono::high_resolution_clock> start_time_;
 
     private:
         void create_shaders_program(GLuint vertex_shader_id, GLuint fragment_shader_id)  {
@@ -61,8 +75,16 @@ namespace shaders {
 
             GLint result = GL_FALSE;
             glGetProgramiv(program_id_, GL_LINK_STATUS, &result);
-            if (!result)
+            if (!result) {
                 std::cerr << "Error in create shaders program\n";
+                int info_log_length;
+                glGetProgramiv(program_id_, GL_INFO_LOG_LENGTH, &info_log_length);
+                if (info_log_length > 0) {
+                    std::vector<char> error_message(info_log_length + 1);
+                    glGetProgramInfoLog(program_id_, info_log_length, NULL, &error_message[0]);
+                    std::cerr <<  &error_message[0] << "\n";
+                }
+            }
         }
 
         void load_shaders(const char* vertex_file_path, const char* fragment_file_path) {
@@ -80,27 +102,53 @@ namespace shaders {
 
     public:
         gl_shaders_program_t(const char* vertex_file_path, const char* fragment_file_path,
-                             const int count_vertexes, const GLfloat* vertex_buffer_data) {
+                             const int size_vertices, const GLfloat* vertices) {
             glewExperimental = true;
             if (glewInit() != GLEW_OK) {
                 std::cerr << "Невозможно инициализировать GLEW\n";
                 return;
             }
-            
-            glGenVertexArrays(1, &vertex_array_id_);
-            glBindVertexArray(vertex_array_id_);
 
-            glGenBuffers(1, &vertex_buffer_);
-            glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
-            glBufferData(GL_ARRAY_BUFFER, count_vertexes * sizeof(*vertex_buffer_data),
-                         vertex_buffer_data, GL_STATIC_DRAW);
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_LESS);
+
+            start_time_ = std::chrono::high_resolution_clock::now();
+            
+            glGenVertexArrays(1, &VAO_);
+            glBindVertexArray(VAO_);
+
+            glGenBuffers(1, &VBO_);
+            glBindBuffer(GL_ARRAY_BUFFER, VBO_);
+            glBufferData(GL_ARRAY_BUFFER, size_vertices * sizeof(*vertices),
+                         vertices, GL_STATIC_DRAW);
 
             load_shaders(vertex_file_path, fragment_file_path);
-
             glUseProgram(program_id_);
+
+            glBindBuffer(GL_ARRAY_BUFFER, VBO_);
             glEnableVertexAttribArray(0);
-            glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+            glEnableVertexAttribArray(1);
+        }
+
+        void update_vertices(const glm::highp_mat4& user_lookat,
+                             const glm::highp_mat4& user_perspective) {
+
+            auto elapsed_time = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<float> elapsed_seconds = elapsed_time - start_time_;
+            float normalized_time = std::max(0.3f, std::min(0.8f, std::fabs(std::sin(elapsed_seconds.count()))));
+            GLint location_time = glGetUniformLocation(program_id_, "time");
+            glUniform1f(location_time, normalized_time);
+
+            glm::mat4 Projection = user_perspective;
+            glm::mat4 View = user_lookat;
+            glm::mat4 Model = glm::mat4(1.0f);
+            glm::mat4 MVP = Projection * View * Model;
+            GLuint MatrixID = glGetUniformLocation(program_id_, "MVP");
+            glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(0 * sizeof(GLfloat)));
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+
         }
     };
 }

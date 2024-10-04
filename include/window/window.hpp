@@ -1,7 +1,6 @@
 #pragma once
 
-#include <SFML/Window.hpp>
-#include <SFML/OpenGL.hpp>
+#include "user.hpp"
 
 namespace window {
 
@@ -13,14 +12,15 @@ namespace window {
             window_.create(window_video_mode, window_name);
         }
 
-        void main_cycle() {
-            glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+        void main_cycle(shaders::gl_shaders_program_t& gl_program, user::user_t& user) {
+            glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
             while (window_.isOpen()) {
                 sf::Event event;
                 while (window_.pollEvent(event)) {
-                    if (event.type == sf::Event::Closed)
+                    if (user.user_event_callback(event) == user::window_event_e::WINDOW_EVENT_EXIT)
                         return;
                 }
+                gl_program.update_vertices(user.get_lookat(), user.get_perspective());
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 glDrawArrays(GL_TRIANGLES, 0, 3);
                 window_.display();

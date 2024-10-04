@@ -1,3 +1,6 @@
 [submodule "glew-cmake"]
 	path = glew-cmake
 	url = https://github.com/Perlmint/glew-cmake
+[submodule "Triangles3D"]
+	path = Triangles3D
+	url = https://github.com/baitim/Triangles3D
