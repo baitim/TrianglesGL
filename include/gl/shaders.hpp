@@ -48,6 +48,8 @@ namespace shaders {
 
 
     class gl_shaders_program_t final {
+        GLuint vertex_array_id_;
+        GLuint vertex_buffer_;
         GLuint program_id_;
 
     private:
@@ -63,8 +65,7 @@ namespace shaders {
                 std::cerr << "Error in create shaders program\n";
         }
 
-    public:
-        gl_shaders_program_t(const char* vertex_file_path, const char* fragment_file_path) {
+        void load_shaders(const char* vertex_file_path, const char* fragment_file_path) {
             gl_shader_t vertex_shader(vertex_file_path, GL_VERTEX_SHADER);
             gl_shader_t fragment_shader(fragment_file_path, GL_FRAGMENT_SHADER);
 
@@ -77,6 +78,29 @@ namespace shaders {
             glDeleteShader(fragment_shader_id);
         }
 
-        GLuint get_program_id() const { return program_id_; }
+    public:
+        gl_shaders_program_t(const char* vertex_file_path, const char* fragment_file_path,
+                             const int count_vertexes, const GLfloat* vertex_buffer_data) {
+            glewExperimental = true;
+            if (glewInit() != GLEW_OK) {
+                std::cerr << "Невозможно инициализировать GLEW\n";
+                return;
+            }
+            
+            glGenVertexArrays(1, &vertex_array_id_);
+            glBindVertexArray(vertex_array_id_);
+
+            glGenBuffers(1, &vertex_buffer_);
+            glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
+            glBufferData(GL_ARRAY_BUFFER, count_vertexes * sizeof(*vertex_buffer_data),
+                         vertex_buffer_data, GL_STATIC_DRAW);
+
+            load_shaders(vertex_file_path, fragment_file_path);
+
+            glUseProgram(program_id_);
+            glEnableVertexAttribArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+        }
     };
 }
