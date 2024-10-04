@@ -17,9 +17,10 @@ namespace user {
         glm::vec3 user_lookup_;
         glm::vec3 speed_;
         const float speed_rotate_ = 1.0f;
-        float aspect_ = 16.0f / 9.0f;
-        float z_near_ = 0.1f;
-        float z_far_  = 100.0f;
+
+        float aspect_     = 16.0f / 9.0f;
+        float z_near_     = 0.1f;
+        float z_far_      = 100.0f;
         float view_angle_ = 45.0f;
         const float aspect_zoom_speed_ = 1.1f;
 
@@ -37,7 +38,7 @@ namespace user {
                 case sf::Event::MouseWheelScrolled:
                     switch (real_numbers::is_real_gt(event.mouseWheelScroll.delta, 0.0f)) {
                         case true:
-                            view_angle_ *= aspect_zoom_speed_;
+                            view_angle_ = std::min(150.0f, view_angle_ * aspect_zoom_speed_);
                             break;
 
                         case false:
