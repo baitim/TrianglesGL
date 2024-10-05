@@ -32,6 +32,17 @@
         in root dir write <code>ctest --test-dir build/Triangles3D</code> in terminal <br>
         maybe you will need these flags for the ctest <code>--rerun-failed --output-on-failure</code>
 
+## How to use
+
+1. Scroll mouse wheel to change view angle
+2.  * <code>W</code> to move forward
+    * <code>S</code> to move back
+    * <code>D</code> to move right
+    * <code>A</code> to move left
+3. Use <code>Q</code> to control view by mouse moving
+
+## Example
+<p align="center"><img src="https://github.com/baitim/Maze/blob/main/images/triangles_example.png" width="60%"></p>
 
 <p align="center"><img src="https://github.com/baitim/TrianglesGl/blob/main/images/cat.gif" width="40%"></p>
 

@@ -66,6 +66,9 @@ namespace shaders {
         GLuint program_id_;
         std::chrono::time_point<std::chrono::high_resolution_clock> start_time_;
 
+        int size_vertices_ = 0;
+        const GLfloat* vertices_;
+
     private:
         void create_shaders_program(GLuint vertex_shader_id, GLuint fragment_shader_id)  {
             program_id_ = glCreateProgram();
@@ -102,53 +105,56 @@ namespace shaders {
 
     public:
         gl_shaders_program_t(const char* vertex_file_path, const char* fragment_file_path,
-                             const int size_vertices, const GLfloat* vertices) {
+                             const int size_vertices, const GLfloat* vertices) :
+                             size_vertices_(size_vertices), vertices_(vertices) {
+
             glewExperimental = true;
             if (glewInit() != GLEW_OK) {
-                std::cerr << "Невозможно инициализировать GLEW\n";
+                std::cerr << "Unable to initialize GLEW\n";
                 return;
             }
 
             glEnable(GL_DEPTH_TEST);
+            glDepthMask(GL_FALSE);
             glDepthFunc(GL_LESS);
 
-            start_time_ = std::chrono::high_resolution_clock::now();
-            
             glGenVertexArrays(1, &VAO_);
-            glBindVertexArray(VAO_);
-
             glGenBuffers(1, &VBO_);
+            glBindVertexArray(VAO_);
             glBindBuffer(GL_ARRAY_BUFFER, VBO_);
-            glBufferData(GL_ARRAY_BUFFER, size_vertices * sizeof(*vertices),
-                         vertices, GL_STATIC_DRAW);
-
-            load_shaders(vertex_file_path, fragment_file_path);
-            glUseProgram(program_id_);
-
-            glBindBuffer(GL_ARRAY_BUFFER, VBO_);
+            glBufferData(GL_ARRAY_BUFFER, size_vertices_ * sizeof(*vertices_), vertices_, GL_STATIC_DRAW);
+            
             glEnableVertexAttribArray(0);
             glEnableVertexAttribArray(1);
-        }
-
-        void update_vertices(const glm::highp_mat4& user_lookat,
-                             const glm::highp_mat4& user_perspective) {
-
-            auto elapsed_time = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<float> elapsed_seconds = elapsed_time - start_time_;
-            float normalized_time = std::max(0.3f, std::min(0.8f, std::fabs(std::sin(elapsed_seconds.count()))));
-            GLint location_time = glGetUniformLocation(program_id_, "time");
-            glUniform1f(location_time, normalized_time);
-
-            glm::mat4 Projection = user_perspective;
-            glm::mat4 View = user_lookat;
-            glm::mat4 Model = glm::mat4(1.0f);
-            glm::mat4 MVP = Projection * View * Model;
-            GLuint MatrixID = glGetUniformLocation(program_id_, "MVP");
-            glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(0 * sizeof(GLfloat)));
             glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 
+            start_time_ = std::chrono::high_resolution_clock::now();
+
+            load_shaders(vertex_file_path, fragment_file_path);
+            glUseProgram(program_id_);
         }
+
+        void update_vertices(const glm::highp_mat4& user_perspective,
+                             const glm::highp_mat4& user_lookat) {
+
+            auto elapsed_time = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<float> elapsed_seconds = elapsed_time - start_time_;
+            float normalized_time = std::max(0.0f, std::min(0.2f, std::fabs(std::sin(1.5f * elapsed_seconds.count()) / 5.f)));
+            GLint location_time = glGetUniformLocation(program_id_, "time");
+            glUniform1f(location_time, normalized_time);
+
+            glm::mat4 Projection = user_perspective;
+            glm::mat4 View  = user_lookat;
+            glm::mat4 Model = glm::mat4(1.0f);
+            glm::mat4 MVP   = Projection * View * Model;
+            GLuint matrix_id = glGetUniformLocation(program_id_, "MVP");
+            glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &MVP[0][0]);
+
+            glBindVertexArray(VAO_);
+        }
+
+        inline int get_count_vertices() const { return size_vertices_ / 6; }
     };
 }

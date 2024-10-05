@@ -17,12 +17,13 @@ namespace window {
             while (window_.isOpen()) {
                 sf::Event event;
                 while (window_.pollEvent(event)) {
-                    if (user.user_event_callback(event) == user::window_event_e::WINDOW_EVENT_EXIT)
+                    if (user.event_callback(event, window_) == user::window_event_e::WINDOW_EVENT_EXIT)
                         return;
                 }
-                gl_program.update_vertices(user.get_lookat(), user.get_perspective());
+
+                gl_program.update_vertices(user.get_perspective(), user.get_lookat());
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                glDrawArrays(GL_TRIANGLES, 0, 3);
+                glDrawArrays(GL_TRIANGLES, 0, gl_program.get_count_vertices());
                 window_.display();
             }
         }
