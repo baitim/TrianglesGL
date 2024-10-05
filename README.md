@@ -42,9 +42,9 @@
 3. Use <code>Q</code> to control view by mouse moving
 
 ## Example
-<p align="center"><img src="https://github.com/baitim/TrianglesGl/blob/main/images/triangles_example.png" width="60%"></p>
+<p align="center"><img src="https://github.com/baitim/TrianglesGl/blob/main/images/triangles_example.png" width="80%"></p>
 
-<p align="center"><img src="https://github.com/baitim/TrianglesGl/blob/main/images/cat.gif" width="40%"></p>
+<p align="center"><img src="https://github.com/baitim/TrianglesGl/blob/main/images/cat.gif" width="60%"></p>
 
 ## Support
 **This project is created by [baitim](https://t.me/bai_tim)**
