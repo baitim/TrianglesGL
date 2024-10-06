@@ -18,8 +18,14 @@ namespace window {
             while (window_.isOpen()) {
                 sf::Event event;
                 while (window_.pollEvent(event)) {
-                    if (user.event_callback(event, window_) == user::window_event_e::WINDOW_EVENT_EXIT)
+                    user::window_event_e response = user.event_callback(event, window_);
+                    if (response == user::window_event_e::WINDOW_EVENT_EXIT) {
                         return;
+                    } else if (response == user::window_event_e::WINDOW_EVENT_RESIZED) {
+                        sf::Vector2u size = window_.getSize();
+                        gl_program.resize(size.x, size.y);
+                        user.set_aspect((float)size.x / (float)size.y);
+                    }
                 }
 
                 gl_program.update_vertices(user.get_perspective(), user.get_lookat());

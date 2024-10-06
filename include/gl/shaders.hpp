@@ -155,6 +155,15 @@ namespace shaders {
             glBindVertexArray(VAO_);
         }
 
+        void resize(int width, int height) {
+            glViewport(0, 0, width, height);
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            glOrtho(0, width, 0, height, -1.0, 1.0);
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
+        }
+
         inline int get_count_vertices() const { return size_vertices_ / 6; }
     };
 }

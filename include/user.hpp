@@ -8,7 +8,8 @@ namespace user {
 
     enum class window_event_e {
         WINDOW_EVENT_NO_EXIT,
-        WINDOW_EVENT_EXIT
+        WINDOW_EVENT_EXIT,
+        WINDOW_EVENT_RESIZED
     };
 
     class user_t final {
@@ -68,6 +69,9 @@ namespace user {
                 case sf::Event::Closed:
                     return window_event_e::WINDOW_EVENT_EXIT;
 
+                case sf::Event::Resized:
+                    return window_event_e::WINDOW_EVENT_RESIZED;
+
                 case sf::Event::MouseWheelScrolled:
                     switch (real_numbers::is_real_gt(event.mouseWheelScroll.delta, 0.0f)) {
                         case true:
@@ -116,6 +120,10 @@ namespace user {
             update_direction_();
             update_right_();
             return window_event_e::WINDOW_EVENT_NO_EXIT;
+        }
+
+        void set_aspect(float resizing_coef) {
+            aspect_ = resizing_coef;
         }
 
         inline glm::highp_mat4 get_lookat() const {
