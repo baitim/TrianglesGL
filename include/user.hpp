@@ -20,8 +20,8 @@ namespace user {
         const float speed_rotate_ = 0.005f;
 
         float aspect_     = 16.0f / 9.0f;
-        float z_near_     = 1.0f;
-        float z_far_      = 5.0f;
+        float z_near_     = 0.1f;
+        float z_far_      = 1000.0f;
         float view_angle_ = 45.0f;
         float min_view_angle_ = 30.0f;
         float max_view_angle_ = 60.0f;
@@ -51,9 +51,11 @@ namespace user {
 
     public:
         user_t(const glm::vec3& user_position, const glm::vec3& speed,
-               float horizontal_angle, float vertical_angle) :
+               float horizontal_angle, float vertical_angle,
+               float z_near, float z_far) :
                user_position_(user_position), speed_(speed),
-               horizontal_angle_(horizontal_angle), vertical_angle_(vertical_angle) {}
+               horizontal_angle_(horizontal_angle), vertical_angle_(vertical_angle),
+               z_near_(z_near), z_far_(z_far) {}
 
         window_event_e event_callback(const sf::Event& event, const sf::Window& window) {
             update_direction_();

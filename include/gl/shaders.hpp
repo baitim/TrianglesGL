@@ -115,8 +115,8 @@ namespace shaders {
             }
 
             glEnable(GL_DEPTH_TEST);
-            glDepthMask(GL_FALSE);
             glDepthFunc(GL_LESS);
+            glDepthMask(GL_TRUE);
 
             glGenVertexArrays(1, &VAO_);
             glGenBuffers(1, &VBO_);

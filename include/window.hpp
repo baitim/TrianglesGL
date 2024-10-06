@@ -8,8 +8,9 @@ namespace window {
         sf::Window window_;
 
     public:
-        window_t(const sf::VideoMode& window_video_mode, const char* window_name) {
-            window_.create(window_video_mode, window_name);
+        window_t(const sf::VideoMode& window_video_mode, const char* window_name,
+                 const sf::ContextSettings& context) {
+            window_.create(window_video_mode, window_name, sf::Style::Default, context);
         }
 
         void main_cycle(shaders::gl_shaders_program_t& gl_program, user::user_t& user) {
