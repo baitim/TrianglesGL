@@ -64,6 +64,8 @@ namespace shaders {
         GLuint VAO_;
         GLuint VBO_;
         GLuint program_id_;
+        GLuint shadows_frame_buffer_;
+        GLuint shadow_map_;
         std::chrono::time_point<std::chrono::high_resolution_clock> start_time_;
 
         int size_vertices_ = 0;
@@ -104,7 +106,8 @@ namespace shaders {
         }
 
     public:
-        gl_shaders_program_t(const char* vertex_file_path, const char* fragment_file_path,
+        gl_shaders_program_t(const char* triangles_vertex_shader,  const char* triangles_fragment_shader,
+                             const char* shadow_map_vertex_shader, const char* shadow_map_fragment_shader,
                              const int size_vertices, const GLfloat* vertices) :
                              size_vertices_(size_vertices), vertices_(vertices) {
 
@@ -115,6 +118,7 @@ namespace shaders {
             }
 
             glEnable(GL_DEPTH_TEST);
+            glEnable(GL_TEXTURE_2D);
             glDepthFunc(GL_LESS);
             glDepthMask(GL_TRUE);
 
@@ -130,10 +134,39 @@ namespace shaders {
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(0 * sizeof(GLfloat)));
             glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 
-            start_time_ = std::chrono::high_resolution_clock::now();
-
-            load_shaders(vertex_file_path, fragment_file_path);
+            load_shaders(shadow_map_vertex_shader, shadow_map_fragment_shader);
             glUseProgram(program_id_);
+
+            glGenTextures(1, &shadow_map_);
+            glBindTexture(GL_TEXTURE_2D, shadow_map_);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 2048, 2048, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+            glGenFramebuffers(1, &shadows_frame_buffer_);
+            glBindFramebuffer(GL_FRAMEBUFFER, shadows_frame_buffer_);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadow_map_, 0);
+            glDrawBuffer(GL_NONE);
+            glReadBuffer(GL_NONE);
+
+            glm::mat4 depthProjectionMatrix = glm::ortho<float>(-1.4, 1.4, -1.4, 1.4, 0.1, 5);
+            glm::mat4 depthViewMatrix = glm::lookAt(glm::vec3(2,2,2), glm::vec3(-1,-1,-1), glm::vec3(0,1,0));
+            glm::mat4 depthModelMatrix = glm::mat4(1.0);
+            glm::mat4 depth_MVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+            GLuint depth_MVP_id = glGetUniformLocation(program_id_, "depth_MVP");
+            glUniformMatrix4fv(depth_MVP_id, 1, GL_FALSE, &depth_MVP[0][0]);
+
+            glViewport(0, 0, 2048, 2048);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glDrawArrays(GL_TRIANGLES, 0, size_vertices_);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            load_shaders(triangles_vertex_shader, triangles_fragment_shader);
+            glUseProgram(program_id_);
+
+            start_time_ = std::chrono::high_resolution_clock::now();
         }
 
         void update_vertices(const glm::highp_mat4& user_perspective,
@@ -145,14 +178,28 @@ namespace shaders {
             GLint location_time = glGetUniformLocation(program_id_, "time");
             glUniform1f(location_time, normalized_time);
 
-            glm::mat4 Projection = user_perspective;
-            glm::mat4 View  = user_lookat;
             glm::mat4 Model = glm::mat4(1.0f);
-            glm::mat4 MVP   = Projection * View * Model;
-            GLuint matrix_id = glGetUniformLocation(program_id_, "MVP");
-            glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &MVP[0][0]);
+            glm::mat4 MVP   = user_perspective * user_lookat * Model;
+            GLuint MVP_id = glGetUniformLocation(program_id_, "MVP");
+            glUniformMatrix4fv(MVP_id, 1, GL_FALSE, &MVP[0][0]);
 
-            glBindVertexArray(VAO_);
+            glm::mat4 depthProjectionMatrix = glm::ortho<float>(-1.4, 1.4, -1.4, 1.4, 0.1, 5);
+            glm::mat4 depthViewMatrix = glm::lookAt(glm::vec3(2,2,2), glm::vec3(-1,-1,-1), glm::vec3(0,1,0));
+            glm::mat4 depthModelMatrix = glm::mat4(1.0);
+            glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+            glm::mat4 biasMatrix(
+            0.5, 0.0, 0.0, 0.0,
+            0.0, 0.5, 0.0, 0.0,
+            0.0, 0.0, 0.5, 0.0,
+            0.5, 0.5, 0.5, 1.0
+            );
+            glm::mat4 depth_bias_MVP = biasMatrix * depthMVP;
+            GLuint depth_bias_MVP_id = glGetUniformLocation(program_id_, "depth_bias_MVP");
+            glUniformMatrix4fv(depth_bias_MVP_id, 1, GL_FALSE, &depth_bias_MVP[0][0]);
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, shadow_map_);
+            glUniform1i(glGetUniformLocation(program_id_, "shadow_map"), 0);
         }
 
         void resize(int width, int height) {
