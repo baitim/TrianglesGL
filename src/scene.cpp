@@ -6,7 +6,7 @@ int main() {
     scene::scene_t<float> scene;
     std::cin >> scene;
 
-    window::window_t window(sf::VideoMode(800, 600), "Triangle", sf::ContextSettings(24, 8, 0, 3, 3));
+    window::window_t window(sf::VideoMode(800, 600), "Triangles", sf::ContextSettings(24, 8, 0, 3, 3));
 
     vertices::vertices_t vertices = scene.get_vertices();
     shaders::gl_shaders_program_t gl_program("include/gl/triangles.vert",
