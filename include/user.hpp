@@ -1,8 +1,8 @@
 #pragma once
 
-#include <SFML/Window.hpp>
 #include "real_numbers.hpp"
 #include "renderer.hpp"
+#include <SFML/Window.hpp>
 
 namespace user {
 

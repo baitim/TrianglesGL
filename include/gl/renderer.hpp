@@ -1,11 +1,11 @@
 #pragma once
 
-#include <bit>
-#include <chrono>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include "shader.hpp"
 #include "vertices.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <bit>
+#include <chrono>
 
 namespace renderer {
     struct shaders_t final {
@@ -135,8 +135,8 @@ namespace renderer {
             glGenBuffers(1, &VBO);
             glBindVertexArray(VAO);
             glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferData(GL_ARRAY_BUFFER, count_vertices_ * sizeof(*vertices.vertices_),
-                         vertices.vertices_, GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, count_vertices_ * sizeof(*vertices.vertices_.get()),
+                         vertices.vertices_.get(), GL_STATIC_DRAW);
             
             glEnableVertexAttribArray(0);
             glEnableVertexAttribArray(1);

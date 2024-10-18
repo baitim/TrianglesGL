@@ -1,7 +1,5 @@
 #pragma once
 
-#include <iostream>
-#include <set>
 #include "octree.hpp"
 #include "vertices.hpp"
 

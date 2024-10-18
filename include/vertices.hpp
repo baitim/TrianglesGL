@@ -1,7 +1,8 @@
 #pragma once
 
-#include <GL/glew.h>
 #include "triangle.hpp"
+#include <GL/glew.h>
+#include <memory>
 
 namespace vertices {
 
@@ -21,11 +22,11 @@ namespace vertices {
 
     struct vertices_t final {
         int count_ = 0;
-        GLfloat* vertices_ = nullptr;
+        std::unique_ptr<GLfloat[]> vertices_;
 
     public:
         vertices_t(int count) : count_(count) {
-            vertices_ = new GLfloat[count];
+            vertices_ = std::make_unique<GLfloat[]>(count);
         }
 
         template <typename T>
@@ -42,10 +43,6 @@ namespace vertices {
                 vertices_[v_ind + 3] = 1.0f;
             else if (type == triangle_type_e::TRIANGLE_TYPE_NOT_INTERSECT)
                 vertices_[v_ind + 5] = 1.0f;
-        }
-
-        ~vertices_t() {
-            delete [] vertices_;
         }
     };
 }

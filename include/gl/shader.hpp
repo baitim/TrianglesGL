@@ -1,12 +1,12 @@
 #pragma once
 
+#include <GL/glew.h>
+#include <GL/glut.h>
 #include <iostream>
 #include <vector>
 #include <sstream>
 #include <string>
 #include <fstream>
-#include <GL/glew.h>
-#include <GL/glut.h>
 
 namespace shader {
     class shader_t final {
