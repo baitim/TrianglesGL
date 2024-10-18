@@ -13,7 +13,7 @@ namespace window {
             window_.create(window_video_mode, window_name, sf::Style::Default, context);
         }
 
-        void main_cycle(shaders::gl_shaders_program_t& gl_program, user::user_t& user) {
+        void main_cycle(renderer::renderer_t& renderer, user::user_t& user) {
             glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
             while (window_.isOpen()) {
                 sf::Event event;
@@ -23,14 +23,14 @@ namespace window {
                         return;
                     } else if (response == user::window_event_e::WINDOW_EVENT_RESIZED) {
                         sf::Vector2u size = window_.getSize();
-                        gl_program.resize(size.x, size.y);
+                        renderer.resize(size.x, size.y);
                         user.set_aspect((float)size.x / (float)size.y);
                     }
                 }
 
-                gl_program.update_vertices(user.get_perspective(), user.get_lookat());
+                renderer.update_vertices(user.get_perspective(), user.get_lookat());
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                glDrawArrays(GL_TRIANGLES, 0, gl_program.get_count_vertices());
+                glDrawArrays(GL_TRIANGLES, 0, renderer.get_count_vertices());
                 window_.display();
             }
         }

@@ -39,7 +39,7 @@
     * <code>S</code> to move back
     * <code>D</code> to move right
     * <code>A</code> to move left
-3. Use <code>Q</code> to control view by mouse moving
+3.    <code>Q</code> to control view by mouse moving
 
 ## Example
 <p align="center"><img src="https://github.com/baitim/TrianglesGl/blob/main/images/triangles_example.png" width="80%"></p>

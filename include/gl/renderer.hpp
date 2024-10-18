@@ -1,66 +1,19 @@
 #pragma once
 
-#include <iostream>
-#include <string>
-#include <cmath>
-#include <vector>
-#include <fstream>
-#include <sstream>
 #include <chrono>
-#include <GL/glew.h>
-#include <GL/glut.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "shader.hpp"
 
-namespace shaders {
-
-    class gl_shader_t final {
-        std::string shader_code_;
-        GLenum shader_type_;
-        GLuint shader_id_;
-
-    private:
-        void get_shader_code(const char* file_path) {
-            std::ifstream shader_stream(file_path, std::ios::in);
-            if (shader_stream.is_open()) {
-                std::stringstream sstr;
-                sstr << shader_stream.rdbuf();
-                shader_code_ = sstr.str();
-                shader_stream.close();
-            }
-        }
-
-        void install_shader()  {
-            shader_id_ = glCreateShader(shader_type_);
-            char const* code = shader_code_.c_str();
-            glShaderSource(shader_id_, 1, &code , NULL);
-            glCompileShader(shader_id_);
-
-            GLint result = GL_FALSE;
-            glGetShaderiv(shader_id_, GL_COMPILE_STATUS, &result);
-            if (!result) {
-                std::cerr << "Error in install shader\n";
-                int info_log_length;
-                glGetShaderiv(shader_id_, GL_INFO_LOG_LENGTH, &info_log_length);
-                if (info_log_length > 0) {
-                    std::vector<char> error_message(info_log_length + 1);
-                    glGetShaderInfoLog(shader_id_, info_log_length, NULL, &error_message[0]);
-                    std::cerr << &error_message[0] << "\n";
-                }
-            }
-        }
-
-    public:
-        gl_shader_t(const char* file_path, GLenum shader_type) : shader_type_(shader_type) {
-            get_shader_code(file_path);
-            install_shader();
-        }
-
-        GLuint get_shader_id() const { return shader_id_; }
+namespace renderer {
+    struct shaders_t final {
+        using container_type = std::vector<std::pair<std::string, GLenum>>;
+        container_type triangles_;
+        container_type shadows_;
+        shaders_t(container_type triangles, container_type shadows) : triangles_(triangles), shadows_(shadows) {}
     };
 
-
-    class gl_shaders_program_t final {
+    class renderer_t final {
         GLuint VAO_;
         GLuint VBO_;
         GLuint program_id_;
@@ -72,44 +25,49 @@ namespace shaders {
         const GLfloat* vertices_;
 
     private:
-        void create_shaders_program(GLuint vertex_shader_id, GLuint fragment_shader_id)  {
-            program_id_ = glCreateProgram();
-            glAttachShader(program_id_, vertex_shader_id);
-            glAttachShader(program_id_, fragment_shader_id);
-            glLinkProgram(program_id_);
+        void process_creation_result(GLint result) {
+            if (result)
+                return;
 
-            GLint result = GL_FALSE;
-            glGetProgramiv(program_id_, GL_LINK_STATUS, &result);
-            if (!result) {
-                std::cerr << "Error in create shaders program\n";
-                int info_log_length;
-                glGetProgramiv(program_id_, GL_INFO_LOG_LENGTH, &info_log_length);
-                if (info_log_length > 0) {
-                    std::vector<char> error_message(info_log_length + 1);
-                    glGetProgramInfoLog(program_id_, info_log_length, NULL, &error_message[0]);
-                    std::cerr <<  &error_message[0] << "\n";
-                }
+            std::cerr << "Error in create shaders program\n";
+            int info_log_length;
+            glGetProgramiv(program_id_, GL_INFO_LOG_LENGTH, &info_log_length);
+            if (info_log_length > 0) {
+                std::vector<char> error_message(info_log_length + 1);
+                glGetProgramInfoLog(program_id_, info_log_length, NULL, &error_message[0]);
+                std::cerr <<  &error_message[0] << "\n";
             }
         }
 
-        void load_shaders(const char* vertex_file_path, const char* fragment_file_path) {
-            gl_shader_t vertex_shader(vertex_file_path, GL_VERTEX_SHADER);
-            gl_shader_t fragment_shader(fragment_file_path, GL_FRAGMENT_SHADER);
+        void create_shaders_program(const std::vector<GLuint>& shaders_id)  {
+            program_id_ = glCreateProgram();
+            for (int i = 0, end = shaders_id.size(); i < end; ++i)
+                glAttachShader(program_id_, shaders_id[i]);
+            glLinkProgram(program_id_);
 
-            GLuint vertex_shader_id   = vertex_shader.get_shader_id();
-            GLuint fragment_shader_id = fragment_shader.get_shader_id();
+            GLint result;
+            glGetProgramiv(program_id_, GL_LINK_STATUS, &result);
+            process_creation_result(result);
+        }
 
-            create_shaders_program(vertex_shader_id, fragment_shader_id);
+        void delete_shaders(const std::vector<GLuint>& shaders_id)  {
+            for (int i = 0, end = shaders_id.size(); i < end; ++i)
+                glDeleteShader(shaders_id[i]);
+        }
 
-            glDeleteShader(vertex_shader_id);
-            glDeleteShader(fragment_shader_id);
+        void load_shaders(const std::vector<std::pair<std::string, GLenum>>& shaders_configs) {
+            std::vector<GLuint> shaders_id;
+            for (int i = 0, end = shaders_configs.size(); i < end; ++i) {
+                shader::shader_t shader{shaders_configs[i].first, shaders_configs[i].second};
+                shaders_id.push_back(shader.get_id());
+            }
+            create_shaders_program(shaders_id);
+            delete_shaders(shaders_id);
         }
 
     public:
-        gl_shaders_program_t(const char* triangles_vertex_shader,  const char* triangles_fragment_shader,
-                             const char* shadow_map_vertex_shader, const char* shadow_map_fragment_shader,
-                             const int size_vertices, const GLfloat* vertices) :
-                             size_vertices_(size_vertices), vertices_(vertices) {
+        renderer_t(const shaders_t& shaders, const int size_vertices, const GLfloat* vertices) :
+                   size_vertices_(size_vertices), vertices_(vertices) {
 
             glewExperimental = true;
             if (glewInit() != GLEW_OK) {
@@ -134,7 +92,7 @@ namespace shaders {
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(0 * sizeof(GLfloat)));
             glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 
-            load_shaders(shadow_map_vertex_shader, shadow_map_fragment_shader);
+            load_shaders(shaders.shadows_);
             glUseProgram(program_id_);
 
             glGenTextures(1, &shadow_map_);
@@ -163,7 +121,7 @@ namespace shaders {
             glDrawArrays(GL_TRIANGLES, 0, size_vertices_);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-            load_shaders(triangles_vertex_shader, triangles_fragment_shader);
+            load_shaders(shaders.triangles_);
             glUseProgram(program_id_);
 
             start_time_ = std::chrono::high_resolution_clock::now();
