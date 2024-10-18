@@ -7,7 +7,7 @@
 namespace user {
 
     enum class window_event_e {
-        WINDOW_EVENT_NO_EXIT,
+        WINDOW_EVENT_DEFAULT,
         WINDOW_EVENT_EXIT,
         WINDOW_EVENT_RESIZED
     };
@@ -62,8 +62,6 @@ namespace user {
             update_direction_();
             update_right_();
 
-            sf::Vector2i mouse_position;
-            int dx, dy;
             bool is_mouse_was_active = is_mouse_active;
             switch (event.type) {
                 case sf::Event::Closed:
@@ -109,7 +107,7 @@ namespace user {
                     break;
             }
             if (is_mouse_active) {
-                mouse_position = sf::Mouse::getPosition(window);
+                sf::Vector2i mouse_position = sf::Mouse::getPosition(window);
                 if (is_mouse_was_active) {
                     horizontal_angle_ -= speed_rotate_ * (mouse_position.x - mouse_position_.x);
                     vertical_angle_   += speed_rotate_ * (mouse_position.y - mouse_position_.y);
@@ -119,11 +117,11 @@ namespace user {
 
             update_direction_();
             update_right_();
-            return window_event_e::WINDOW_EVENT_NO_EXIT;
+            return window_event_e::WINDOW_EVENT_DEFAULT;
         }
 
-        void set_aspect(float resizing_coef) {
-            aspect_ = resizing_coef;
+        void set_aspect(int width, int height) {
+            aspect_ = static_cast<float>(width) / static_cast<float>(height);
         }
 
         inline glm::highp_mat4 get_lookat() const {

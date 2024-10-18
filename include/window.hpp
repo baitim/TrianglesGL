@@ -23,7 +23,7 @@ namespace window {
                     } else if (response == user::window_event_e::WINDOW_EVENT_RESIZED) {
                         sf::Vector2u size = window_.getSize();
                         renderer.resize(size.x, size.y);
-                        user.set_aspect((float)size.x / (float)size.y);
+                        user.set_aspect(size.x, size.y);
                     }
                 }
 

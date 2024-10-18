@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bit>
 #include <chrono>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -141,8 +142,8 @@ namespace renderer {
             glEnableVertexAttribArray(1);
 
             size_t glfloat_sz = sizeof(GLfloat);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * glfloat_sz, (void*)(0 * glfloat_sz));
-            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * glfloat_sz, (void*)(3 * glfloat_sz));
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * glfloat_sz, std::bit_cast<void*>(0 * glfloat_sz));
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * glfloat_sz, std::bit_cast<void*>(3 * glfloat_sz));
         }
 
         void set_uniform_time() {
