@@ -8,13 +8,12 @@ namespace window {
         sf::Window window_;
 
     public:
-        window_t(const sf::VideoMode& window_video_mode, const char* window_name,
+        window_t(const sf::VideoMode& window_video_mode, const std::string& window_name,
                  const sf::ContextSettings& context) {
             window_.create(window_video_mode, window_name, sf::Style::Default, context);
         }
 
         void main_cycle(renderer::renderer_t& renderer, user::user_t& user) {
-            glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
             while (window_.isOpen()) {
                 sf::Event event;
                 while (window_.pollEvent(event)) {
@@ -28,9 +27,7 @@ namespace window {
                     }
                 }
 
-                renderer.update_vertices(user.get_perspective(), user.get_lookat());
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                glDrawArrays(GL_TRIANGLES, 0, renderer.get_count_vertices());
+                renderer.render(user.get_perspective(), user.get_lookat());
                 window_.display();
             }
         }
