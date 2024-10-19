@@ -117,7 +117,7 @@ namespace user {
                 sf::Vector2i mouse_position = sf::Mouse::getPosition(window);
                 if (is_mouse_was_active) {
                     horizontal_angle_ -= speed_rotate_ * (mouse_position.x - mouse_position_.x);
-                    vertical_angle_   += speed_rotate_ * (mouse_position.y - mouse_position_.y);
+                    vertical_angle_   -= speed_rotate_ * (mouse_position.y - mouse_position_.y);
                 }
                 mouse_position_ = mouse_position;
             }
