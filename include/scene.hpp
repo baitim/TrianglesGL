@@ -52,7 +52,7 @@ namespace scene {
         return is;
     }
 
-    std::vector<std::string> get_sorted_files(std::filesystem::path path) {
+    std::vector<std::string> get_sorted_files(const std::filesystem::path& path) {
         std::vector<std::string> files;
 
         for (const auto& entry : std::filesystem::directory_iterator(path))
@@ -62,9 +62,8 @@ namespace scene {
         return files;
     }
 
-    std::vector<scene::scene_t<float>> get_scenes(std::filesystem::path relative_path) {
+    std::vector<scene::scene_t<float>> get_scenes(const std::filesystem::path& relative_path) {
         std::string file{__FILE__};
-
         std::filesystem::path dir = file.substr(0, file.rfind("/"));
         std::filesystem::path scenes_path = dir / relative_path;
 

@@ -12,12 +12,13 @@ namespace renderer {
         using container_type = std::vector<std::pair<std::string, GLenum>>;
         container_type triangles_;
         container_type shadows_;
-        shaders_t(container_type triangles, container_type shadows) : triangles_(triangles), shadows_(shadows) {}
+        shaders_t(const container_type& triangles, const container_type& shadows) :
+                  triangles_(triangles), shadows_(shadows) {}
     };
 
     class shadow_map_t final {
         GLuint id_;
-        int width_ = 2048;
+        int width_  = 2048;
         int height_ = 2048;
         glm::mat4 depth_MVP_;
 
@@ -33,7 +34,7 @@ namespace renderer {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         }
 
-        void set_buffer(GLuint VBO) {
+        void set_buffer(GLuint VBO) const {
             glGenFramebuffers(1, &VBO);
             glBindFramebuffer(GL_FRAMEBUFFER, VBO);
             glDrawBuffer(GL_NONE);
@@ -76,7 +77,7 @@ namespace renderer {
         std::chrono::time_point<std::chrono::high_resolution_clock> start_time_;
 
     private:
-        void init_gl() {
+        void init_gl() const {
             glewExperimental = true;
             if (glewInit() != GLEW_OK) {
                 std::cerr << "Unable to initialize GLEW\n";
@@ -90,7 +91,7 @@ namespace renderer {
             glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
         }
 
-        void process_creation_result(GLint result) {
+        void process_creation_result(GLint result) const {
             if (result)
                 return;
 
@@ -104,7 +105,7 @@ namespace renderer {
             }
         }
 
-        void create_shaders_program(const std::vector<GLuint>& shaders_id)  {
+        void create_shaders_program(const std::vector<GLuint>& shaders_id) {
             program_id_ = glCreateProgram();
             for (int i = 0, end = shaders_id.size(); i < end; ++i)
                 glAttachShader(program_id_, shaders_id[i]);
@@ -115,7 +116,7 @@ namespace renderer {
             process_creation_result(result);
         }
 
-        void delete_shaders(const std::vector<GLuint>& shaders_id)  {
+        void delete_shaders(const std::vector<GLuint>& shaders_id) const {
             for (int i = 0, end = shaders_id.size(); i < end; ++i)
                 glDeleteShader(shaders_id[i]);
         }
@@ -130,7 +131,7 @@ namespace renderer {
             delete_shaders(shaders_id);
         }
 
-        void bind_vertices(const vertices::vertices_t& vertices) {
+        void bind_vertices(const vertices::vertices_t& vertices) const {
             GLuint VAO, VBO;
             glGenVertexArrays(1, &VAO);
             glGenBuffers(1, &VBO);
@@ -147,7 +148,7 @@ namespace renderer {
             glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * glfloat_sz, std::bit_cast<void*>(3 * glfloat_sz));
         }
 
-        void set_uniform_time() {
+        void set_uniform_time() const {
             auto elapsed_time = std::chrono::high_resolution_clock::now();
             std::chrono::duration<float> elapsed_seconds = elapsed_time - start_time_;
             float normalized_time = std::max(0.0f, std::min(0.2f, std::fabs(std::sin(1.5f * elapsed_seconds.count()) / 5.f)));
@@ -156,7 +157,7 @@ namespace renderer {
         }
 
         void set_uniform_MVP(const glm::highp_mat4& user_perspective,
-                             const glm::highp_mat4& user_lookat) {
+                             const glm::highp_mat4& user_lookat) const {
             glm::mat4 Model = glm::mat4(1.0f);
             glm::mat4 MVP   = user_perspective * user_lookat * Model;
             GLuint MVP_id   = glGetUniformLocation(program_id_, "MVP");
@@ -164,7 +165,7 @@ namespace renderer {
         }
 
         void set_uniform_depth_bias_MVP(const glm::highp_mat4& user_perspective,
-                                        const glm::highp_mat4& user_lookat) {
+                                        const glm::highp_mat4& user_lookat) const {
             glm::mat4 biasMatrix(
             0.5, 0.0, 0.0, 0.0,
             0.0, 0.5, 0.0, 0.0,
@@ -176,7 +177,7 @@ namespace renderer {
             glUniformMatrix4fv(depth_bias_MVP_id, 1, GL_FALSE, &depth_bias_MVP[0][0]);
         }
 
-        void set_uniform_shadow_map() {
+        void set_uniform_shadow_map() const {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, shadow_map_.get_id());
             glUniform1i(glGetUniformLocation(program_id_, "shadow_map"), 0);
@@ -205,7 +206,7 @@ namespace renderer {
         }
 
         void render(const glm::highp_mat4& user_perspective,
-                    const glm::highp_mat4& user_lookat) {
+                    const glm::highp_mat4& user_lookat) const {
 
             set_uniform_time();
             set_uniform_MVP(user_perspective, user_lookat);
@@ -221,7 +222,7 @@ namespace renderer {
             start_program(vertices, w_width, w_height);
         }
 
-        void resize(int width, int height) {
+        void resize(int width, int height) const {
             glViewport(0, 0, width, height);
             glMatrixMode(GL_PROJECTION);
             glLoadIdentity();

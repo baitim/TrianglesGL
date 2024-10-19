@@ -2,7 +2,7 @@
 
 int main() {
     int w_width  = 800;
-    int w_height = 800;
+    int w_height = 600;
     window::window_t window(sf::VideoMode(w_width, w_height), "Triangles", sf::ContextSettings(24, 8, 0, 3, 3));
     
     std::vector<scene::scene_t<float>> scenes = scene::get_scenes("../scenes/scenes_in");

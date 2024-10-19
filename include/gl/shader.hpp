@@ -25,7 +25,7 @@ namespace shader {
             }
         }
 
-        void process_installation_result(GLint result) {
+        void process_installation_result(GLint result) const {
             if (result)
                 return;
 
