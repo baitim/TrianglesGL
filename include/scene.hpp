@@ -2,6 +2,9 @@
 
 #include "octree.hpp"
 #include "vertices.hpp"
+#include <string>
+#include <filesystem>
+#include <fstream>
 
 namespace scene {
 
@@ -19,7 +22,7 @@ namespace scene {
                 triangles_types_[it] = vertices::triangle_type_e::TRIANGLE_TYPE_INTERSECT;
         }
 
-        vertices::vertices_t get_vertices() {
+        vertices::vertices_t get_vertices() const {
             vertices::vertices_t vertices{count_ * vertices::TRIANGLE2VERTEX_SIZE};
             int vertex_index_shift = vertices::TRIANGLE2VERTEX_SIZE / 3;
             
@@ -47,5 +50,31 @@ namespace scene {
         sc.set_types();
 
         return is;
+    }
+
+    std::vector<std::string> get_sorted_files(std::filesystem::path path) {
+        std::vector<std::string> files;
+
+        for (const auto& entry : std::filesystem::directory_iterator(path))
+            files.push_back(entry.path().string());
+
+        std::sort(files.begin(), files.end());
+        return files;
+    }
+
+    std::vector<scene::scene_t<float>> get_scenes(std::filesystem::path relative_path) {
+        std::string file{__FILE__};
+
+        std::filesystem::path dir = file.substr(0, file.rfind("/"));
+        std::filesystem::path scenes_path = dir / relative_path;
+
+        std::vector<std::string> scenes_data = get_sorted_files(scenes_path);
+        std::vector<scene::scene_t<float>> scenes(scenes_data.size());
+        for (int i = 0, end = scenes_data.size(); i < end; ++i) {
+            std::ifstream data(scenes_data[i]);
+            data >> scenes[i];
+            data.close();
+        }
+        return scenes;
     }
 }

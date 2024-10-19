@@ -69,6 +69,7 @@ namespace renderer {
     };
 
     class renderer_t final {
+        shaders_t shaders_;
         GLuint program_id_;
         shadow_map_t shadow_map_;
         int count_vertices_ = 0;
@@ -181,20 +182,24 @@ namespace renderer {
             glUniform1i(glGetUniformLocation(program_id_, "shadow_map"), 0);
         }
 
-    public:
-        renderer_t(const shaders_t& shaders, const vertices::vertices_t& vertices) : count_vertices_(vertices.count_) {
-            init_gl();
-
+        void start_program(const vertices::vertices_t& vertices) {
             bind_vertices(vertices);
 
-            load_shaders(shaders.shadows_);
+            load_shaders(shaders_.shadows_);
             glUseProgram(program_id_);
-            shadow_map_.init(program_id_, vertices.count_);
+            shadow_map_.init(program_id_, count_vertices_);
 
-            load_shaders(shaders.triangles_);
+            load_shaders(shaders_.triangles_);
             glUseProgram(program_id_);
 
             start_time_ = std::chrono::high_resolution_clock::now();
+        }
+
+    public:
+        renderer_t(const shaders_t& shaders, const vertices::vertices_t& vertices) :
+                   shaders_(shaders), count_vertices_(vertices.count_) {
+            init_gl();
+            start_program(vertices);
         }
 
         void render(const glm::highp_mat4& user_perspective,
@@ -207,6 +212,11 @@ namespace renderer {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glDrawArrays(GL_TRIANGLES, 0, count_vertices_);
+        }
+
+        void rebind_scene(const vertices::vertices_t& vertices) {
+            count_vertices_ = vertices.count_;
+            start_program(vertices);
         }
 
         void resize(int width, int height) {

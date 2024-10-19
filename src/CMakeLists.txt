@@ -16,3 +16,10 @@ target_include_directories(scene PUBLIC ${INCLUDE_DIR})
 
 target_link_libraries(scene OpenGL::GL GLEW)
 target_link_libraries(scene sfml-graphics)
+
+set(PYTHON_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/../scenes/generate.py")
+add_custom_target(
+    generate_scenes_target ALL
+    COMMAND python3 ${PYTHON_SCRIPT}
+    DEPENDS scene
+)

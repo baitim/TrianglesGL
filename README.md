@@ -40,6 +40,7 @@
     * <code>D</code> to move right
     * <code>A</code> to move left
 3.    <code>Q</code> to control view by mouse moving
+4.    <code>E</code> to change scene
 
 ## Example
 <p align="center"><img src="https://github.com/baitim/TrianglesGl/blob/main/images/triangles_example.png" width="80%"></p>

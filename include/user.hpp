@@ -7,9 +7,10 @@
 namespace user {
 
     enum class window_event_e {
-        WINDOW_EVENT_DEFAULT,
-        WINDOW_EVENT_EXIT,
-        WINDOW_EVENT_RESIZED
+        DEFAULT,
+        EXIT,
+        RESIZED,
+        NEW_SCENE
     };
 
     class user_t final {
@@ -34,6 +35,9 @@ namespace user {
         glm::vec3 direction_;
         glm::vec3 right_;
 
+        int number_scene_  = 0;
+        int count_scenes_ = 0;
+
         void update_direction_() {
             direction_ = glm::vec3{
                 cos(vertical_angle_) * sin(horizontal_angle_),
@@ -53,10 +57,10 @@ namespace user {
     public:
         user_t(const glm::vec3& user_position, const glm::vec3& speed,
                float horizontal_angle, float vertical_angle,
-               float z_near, float z_far) :
+               float z_near, float z_far, int count_scenes) :
                user_position_(user_position), speed_(speed),
                horizontal_angle_(horizontal_angle), vertical_angle_(vertical_angle),
-               z_near_(z_near), z_far_(z_far) {}
+               z_near_(z_near), z_far_(z_far), count_scenes_(count_scenes) {}
 
         window_event_e event_callback(const sf::Event& event, const sf::Window& window) {
             update_direction_();
@@ -65,10 +69,10 @@ namespace user {
             bool is_mouse_was_active = is_mouse_active;
             switch (event.type) {
                 case sf::Event::Closed:
-                    return window_event_e::WINDOW_EVENT_EXIT;
+                    return window_event_e::EXIT;
 
                 case sf::Event::Resized:
-                    return window_event_e::WINDOW_EVENT_RESIZED;
+                    return window_event_e::RESIZED;
 
                 case sf::Event::MouseWheelScrolled:
                     switch (real_numbers::is_real_gt(event.mouseWheelScroll.delta, 0.0f)) {
@@ -98,6 +102,9 @@ namespace user {
                         case sf::Keyboard::Q:
                             is_mouse_active = !is_mouse_active;
                             break;
+                        case sf::Keyboard::E:
+                            number_scene_ = (number_scene_ + 1) % count_scenes_;
+                            return window_event_e::NEW_SCENE;
                         default:
                             break;
                     }
@@ -117,7 +124,7 @@ namespace user {
 
             update_direction_();
             update_right_();
-            return window_event_e::WINDOW_EVENT_DEFAULT;
+            return window_event_e::DEFAULT;
         }
 
         void set_aspect(int width, int height) {
@@ -131,6 +138,10 @@ namespace user {
 
         inline glm::highp_mat4 get_perspective() const {
             return glm::perspective(glm::radians(view_angle_), aspect_, z_near_, z_far_);
+        }
+
+        int get_number_scene() const {
+            return number_scene_;
         }
     };
 }
