@@ -39,7 +39,7 @@
     * <code>S</code> to move back
     * <code>D</code> to move right
     * <code>A</code> to move left
-3.    <code>Q</code> to control view by mouse moving
+3.    <code>Q</code> to activate/deactivate control camera by mouse moving(1 click)
 4.    <code>E</code> to change scene
 
 ## Example
