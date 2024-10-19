@@ -42,6 +42,14 @@
 3.    <code>Q</code> to activate/deactivate control camera by mouse moving(1 click)
 4.    <code>E</code> to change scene
 
+## How to generate scenes
+
+1. - Go to folder <br>
+        write <code>cd scenes</code> in terminal
+
+2. - Generate scenes <br>
+        write <code>python3 generate.py</code> in terminal
+
 ## Example
 <p align="center"><img src="https://github.com/baitim/TrianglesGl/blob/main/images/triangles_example.png" width="80%"></p>
 
