@@ -32,9 +32,9 @@ namespace window {
                             break;
 
                         case user::window_event_e::NEW_SCENE: {
-                                renderer.rebind_scene(scenes[user.get_number_scene()].get_vertices());
                                 sf::Vector2u size = window_.getSize();
-                                renderer.resize(size.x, size.y);
+                                renderer.rebind_scene(scenes[user.get_number_scene()].get_vertices(),
+                                                      size.x, size.y);
                             }
                             break;
                     }
