@@ -9,7 +9,7 @@ uniform sampler2D shadow_map;
 void main() {
     vec3 p = shadow_coord.xyz / shadow_coord.w;
     float visability = 1.0f;
-    float bias = 0.02f;
+    float bias = 0.05f;
     if (shadow_coord.x > 1.0 || shadow_coord.x < 0.0 ||
         shadow_coord.y > 1.0 || shadow_coord.y < 0.0 ||
         shadow_coord.z > 1.0 || shadow_coord.z < 0.0)
