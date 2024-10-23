@@ -13,10 +13,9 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-if(NOT CMAKE_CXX_FLAGS_DEBUG)
-    set(CMAKE_CXX_FLAGS_DEBUG "-Wall -g -O0 -fsanitize=address -fsanitize=undefined")
-endif()
+set(CMAKE_CXX_FLAGS_DEBUG "-Wall -g -O0 -fsanitize=address -fsanitize=undefined")
 
 add_subdirectory(./glew-cmake)
+add_subdirectory(./SFML)
 add_subdirectory(./Triangles3D)
 add_subdirectory(./src)

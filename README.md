@@ -12,10 +12,13 @@
 2. Go to folder <br>
     write <code>cd TrianglesGl</code> in terminal
 
-3. Build <br>
+3. Init submodules <br>
+    write <code>git submodule update --init --recursive</code> in terminal
+
+4. Build <br>
     write <code>cmake . -B build ; cmake --build build</code> in terminal
 
-4. Run <br>
+5. Run <br>
     write <code>./build/src/scene</code> in terminal <br>
 
 ## How to test

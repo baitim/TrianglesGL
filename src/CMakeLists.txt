@@ -8,8 +8,6 @@ set(INCLUDE_DIR
 )
 
 find_package(OpenGL REQUIRED)
-find_package(GLEW   REQUIRED)
-find_package(SFML   COMPONENTS graphics REQUIRED)
 
 add_executable(scene scene.cpp)
 target_include_directories(scene PUBLIC ${INCLUDE_DIR})

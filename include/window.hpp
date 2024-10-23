@@ -37,6 +37,9 @@ namespace window {
                                                       size.x, size.y);
                             }
                             break;
+
+                        default:
+                            break;
                     }
                 }
 
