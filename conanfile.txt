@@ -1,0 +1,10 @@
+[requires]
+opengl/system
+freeglut/3.4.0
+sfml/2.6.1
+glew/2.2.0
+[generators]
+CMakeDeps
+CMakeToolchain
+[layout]
+cmake_layout

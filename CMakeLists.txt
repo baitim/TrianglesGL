@@ -15,7 +15,5 @@ endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG "-Wall -g -O0 -fsanitize=address -fsanitize=undefined")
 
-add_subdirectory(./glew-cmake)
-add_subdirectory(./SFML)
 add_subdirectory(./Triangles3D)
 add_subdirectory(./src)

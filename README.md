@@ -12,13 +12,16 @@
 2. Go to folder <br>
     write <code>cd TrianglesGl</code> in terminal
 
-3. Init submodules <br>
-    write <code>git submodule update --init --recursive</code> in terminal
+3. Prepare conan <br>
+    write <code>conan profile detect --force</code> in terminal
 
-4. Build <br>
-    write <code>cmake . -B build ; cmake --build build</code> in terminal
+4. Init dependencies <br>
+    write <code>conan install . --build=missing -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=True -s compiler.cppstd=gnu20</code> in terminal
 
-5. Run <br>
+5. Build <br>
+    write <code>cmake . -B build -DCMAKE_TOOLCHAIN_FILE=build/Release/generators/conan_toolchain.cmake; cmake --build build</code> in terminal
+
+6. Run <br>
     write <code>./build/src/scene</code> in terminal <br>
 
 ## How to test
