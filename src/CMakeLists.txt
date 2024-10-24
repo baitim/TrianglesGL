@@ -7,14 +7,14 @@ set(INCLUDE_DIR
     ${CMAKE_CURRENT_SOURCE_DIR}/../Triangles3D/include/
 )
 
-find_package(OpenGL   REQUIRED)
-find_package(GLEW     REQUIRED)
-find_package(FreeGLUT REQUIRED)
-find_package(SFML     REQUIRED COMPONENTS graphics window)
+find_package(OpenGL REQUIRED)
+find_package(GLEW   REQUIRED)
+find_package(GLUT   REQUIRED)
+find_package(SFML   REQUIRED COMPONENTS graphics window)
 
 add_executable(scene scene.cpp)
 target_include_directories(scene PUBLIC ${INCLUDE_DIR})
-target_link_libraries(scene OpenGL::GL GLEW ${FreeGLUT_LIBRARIES} ${SFML_LIBRARIES})
+target_link_libraries(scene OpenGL::GL GLEW GLUT::GLUT sfml-graphics sfml-window)
 
 set(PYTHON_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/../scenes/generate.py")
 add_custom_target(
