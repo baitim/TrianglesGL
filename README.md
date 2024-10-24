@@ -17,11 +17,14 @@
 
 4. Init dependencies <br>
     write <code>conan install . --build=missing -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=True -s compiler.cppstd=gnu20</code> in terminal
+    
+5. Init submodules <br>
+    write <code>git submodule update --init --recursive</code> in terminal
 
-5. Build <br>
+6. Build <br>
     write <code>cmake . -B build -DCMAKE_TOOLCHAIN_FILE=build/Release/generators/conan_toolchain.cmake; cmake --build build</code> in terminal
 
-6. Run <br>
+7. Run <br>
     write <code>./build/src/scene</code> in terminal <br>
 
 ## How to test
