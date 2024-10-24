@@ -1,4 +1,4 @@
-<h1 align="center">TrianglesGl</h1>
+<h1 align="center">TrianglesGL</h1>
 
 ## Description
 
@@ -7,7 +7,7 @@
 ## How to run
 
 1. Clone <br>
-    write <code>git clone https://github.com/baitim/TrianglesGl.git</code> in terminal
+    write <code>git clone https://github.com/baitim/TrianglesGL.git</code> in terminal
 
 2. Go to folder <br>
     write <code>cd TrianglesGL</code> in terminal
@@ -60,9 +60,9 @@
         write <code>python3 generate.py</code> in terminal
 
 ## Example
-<p align="center"><img src="https://github.com/baitim/TrianglesGl/blob/main/images/triangles_example.png" width="80%"></p>
+<p align="center"><img src="https://github.com/baitim/TrianglesGL/blob/main/images/triangles_example.png" width="80%"></p>
 
-<p align="center"><img src="https://github.com/baitim/TrianglesGl/blob/main/images/cat.gif" width="60%"></p>
+<p align="center"><img src="https://github.com/baitim/TrianglesGL/blob/main/images/cat.gif" width="60%"></p>
 
 ## Support
 **This project is created by [baitim](https://t.me/bai_tim)**
