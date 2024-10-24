@@ -10,7 +10,7 @@
     write <code>git clone https://github.com/baitim/TrianglesGl.git</code> in terminal
 
 2. Go to folder <br>
-    write <code>cd TrianglesGl</code> in terminal
+    write <code>cd TrianglesGL</code> in terminal
 
 3. Prepare conan <br>
     write <code>conan profile detect --force</code> in terminal
