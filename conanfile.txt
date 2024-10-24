@@ -1,8 +1,9 @@
 [requires]
 opengl/system
 freeglut/3.4.0
-sfml/2.6.1
 glew/2.2.0
+glm/cci.20230113
+sfml/2.6.1
 [generators]
 CMakeDeps
 CMakeToolchain
