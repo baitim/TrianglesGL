@@ -1,5 +1,4 @@
 [requires]
-libudev/system
 opengl/system
 freeglut/3.4.0
 sfml/2.6.1
