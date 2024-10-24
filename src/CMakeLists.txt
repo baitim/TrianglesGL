@@ -8,13 +8,12 @@ set(INCLUDE_DIR
 )
 
 find_package(OpenGL REQUIRED)
-find_package(GLEW   REQUIRED)
-find_package(GLUT   REQUIRED)
-find_package(SFML   REQUIRED COMPONENTS graphics)
+find_package(GLUT   REQUIRED NODULE)
+find_package(SFML   REQUIRED COMPONENTS window)
 
 add_executable(scene scene.cpp)
 target_include_directories(scene PUBLIC ${INCLUDE_DIR})
-target_link_libraries(scene OpenGL::GL GLEW GLUT::GLUT sfml-graphics)
+target_link_libraries(scene OpenGL::GL GLEW GLUT::GLUT sfml-window)
 
 set(PYTHON_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/../scenes/generate.py")
 add_custom_target(
