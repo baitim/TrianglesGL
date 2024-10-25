@@ -8,10 +8,12 @@ int main() {
     int w_height = 600;
     window::window_t window(sf::VideoMode(w_width, w_height), "Triangles", sf::ContextSettings(24, 8, 0, 3, 3));
     
-    std::vector<scene::scene_t<float>> scenes = scene::get_scenes(dir / "../scenes/scenes_in");
-    if (scenes.size() == 0) {
-        std::cerr << "zero scenes uploaded\n";
-        return 0;
+    std::vector<scene::scene_t<float>> scenes;
+    try {
+        scenes = scene::get_scenes(dir / "../scenes/scenes_in");
+    } catch (const char* error_message) {
+        std::cout << print_red(error_message) << "\n";
+        return 1;
     }
 
     renderer::shaders_t shaders = {{{dir / "../include/gl/triangles.vs",  GL_VERTEX_SHADER},
@@ -20,8 +22,10 @@ int main() {
                                     {dir / "../include/gl/shadow_map.fs", GL_FRAGMENT_SHADER}}};
     renderer::renderer_t renderer(shaders, scenes[0].get_vertices(), w_width, w_height);
 
-    user::user_t user(glm::vec3(0.0f, 0.0f, -7.0f), glm::vec3(0.07f, 0.07f, 0.07f), 0, 0, 0.1f, 20.0f,
-                      scenes.size());
+    glm::vec3 user_start_position = glm::vec3(0.f, 0.f, -7.f);
+    glm::vec3 user_speed          = glm::vec3(.07f, .07f, .07f);
+    float     user_zfar           = 70;
+    user::user_t user(user_start_position, user_speed, 0, 0, 0.1f, user_zfar, scenes.size());
 
     window.main_cycle(renderer, user, scenes);
 

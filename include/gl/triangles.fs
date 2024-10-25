@@ -2,6 +2,7 @@
 
 in vec3 v_color;
 in vec4 shadow_coord;
+in vec3 triangle_normal;
 
 uniform float time;
 uniform sampler2D shadow_map;
