@@ -59,6 +59,10 @@
 2. - Generate scenes <br>
         write <code>python3 generate.py</code> in terminal
 
+## Tested
+
+1. project building in ubuntu:latest
+
 ## Example
 <p align="center"><img src="https://github.com/baitim/TrianglesGL/blob/main/images/triangles_example.png" width="80%"></p>
 
