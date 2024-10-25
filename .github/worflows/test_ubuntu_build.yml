@@ -1,0 +1,21 @@
+name: TrianglesGL pre-commit and post-push
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - name: checkout repository
+      uses: actions/checkout@v3
+    - name: build a docker image
+      run: docker build --tag TrianglesGL ~/TrianglesGL
+    - name: start docker container
+      run: docker run --name TrianglesGL -d TrianglesGL
