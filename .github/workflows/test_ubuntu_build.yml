@@ -16,6 +16,6 @@ jobs:
     - name: checkout repository
       uses: actions/checkout@v3
     - name: build docker image
-      run: docker build --tag trianglesgl ~/TrianglesGL
+      run: docker build . --tag trianglesgl
     - name: start docker container
       run: docker run --name trianglesgl
