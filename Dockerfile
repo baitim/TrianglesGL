@@ -1,4 +1,6 @@
 FROM ubuntu:latest
+WORKDIR /app
+COPY . .
 RUN apt-get -y update
 RUN apt-get -y upgrade
 RUN apt-get -y install git
@@ -14,3 +16,4 @@ RUN conan install . --build=missing -c tools.system.package_manager:mode=install
     -c tools.system.package_manager:sudo=True -s compiler.cppstd=gnu20
 RUN git submodule update --init --recursive
 RUN cmake . -B build -DCMAKE_TOOLCHAIN_FILE=build/Release/generators/conan_toolchain.cmake; cmake --build build
+ENTRYPOINT ["/app"]
