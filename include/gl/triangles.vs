@@ -14,6 +14,7 @@ uniform mat4 depth_bias_MVP;
 out vec3  v_color;
 out vec4  shadow_coord_;
 out float is_dark_side;
+out float light_angle;
 
 void main() {
     gl_Position = MVP * vec4(position, 1.0);
@@ -21,7 +22,8 @@ void main() {
     shadow_coord_ = depth_bias_MVP * vec4(position, 1.0);
 
     vec3 normal = normals[gl_VertexID / 3];
-    if(dot(user_dir, normal) * dot(light_dir, normal) < 0)
+    light_angle = dot(light_dir, normal);
+    if(dot(user_dir, normal) * light_angle < 0)
         is_dark_side = 1.0;
     else
         is_dark_side = 0.0;
