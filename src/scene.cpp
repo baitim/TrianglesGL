@@ -20,7 +20,7 @@ int main() {
                                     {dir / "../include/gl/triangles.fs",  GL_FRAGMENT_SHADER}},
                                    {{dir / "../include/gl/shadow_map.vs", GL_VERTEX_SHADER},
                                     {dir / "../include/gl/shadow_map.fs", GL_FRAGMENT_SHADER}}};
-    renderer::renderer_t renderer(shaders, scenes[0].get_vertices(), w_width, w_height);
+    renderer::renderer_t renderer(shaders, scenes[0].get_data(), w_width, w_height);
 
     glm::vec3 user_start_position = glm::vec3(0.f, 0.f, -7.f);
     glm::vec3 user_speed          = glm::vec3(.07f, .07f, .07f);

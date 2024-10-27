@@ -2,6 +2,7 @@
 
 #include "octree.hpp"
 #include "vertices.hpp"
+#include <algorithm>
 #include <string>
 #include <filesystem>
 #include <fstream>
@@ -14,10 +15,17 @@ namespace scene {
         TRIANGLE_TYPE_INTERSECT
     };
 
+    struct data2render_t final {
+        vertices::vertices_t vertices_;
+        vertices::normals_t  normals_;
+
+        data2render_t(int count) : vertices_(count * vertices::TRIANGLE2VERTEX_SIZE),
+                                   normals_ (count * vertices::TRIANGLE2NORMAL_SIZE) {}
+    };
+
     template <typename T = double>
     struct scene_t final {
         int count_ = 0;
-        T shift_shadows_ = 0.005;
         std::vector<triangle::triangle_t<T>> triangles_;
         std::vector<triangle_type_e> triangles_types_;
 
@@ -29,11 +37,13 @@ namespace scene {
                 triangles_types_[it] = triangle_type_e::TRIANGLE_TYPE_INTERSECT;
         }
 
-        vertices::vertices_t get_vertices() const {
-            vertices::vertices_t vertices{count_ * vertices::TRIANGLE2VERTEX_SIZE};
+        data2render_t get_data() const {
+            data2render_t data{count_};
             int vertex_index_shift = vertices::TRIANGLE2VERTEX_SIZE / 3;
             
-            for (int i = 0, v_index = 0; i < count_; ++i, v_index += vertices::TRIANGLE2VERTEX_SIZE) {
+            for (int i = 0, n_index = 0, v_index = 0;
+                 i < count_;
+                 ++i, n_index += vertices::TRIANGLE2NORMAL_SIZE, v_index += vertices::TRIANGLE2VERTEX_SIZE) {
 
                 vertices::vertex_color_t<T> color;
                 if (triangles_types_[i] == triangle_type_e::TRIANGLE_TYPE_INTERSECT)
@@ -45,14 +55,16 @@ namespace scene {
                 vertices::vertex_coords_t<T> b_coords{triangles_[i].b_.x_, triangles_[i].b_.y_, triangles_[i].b_.z_};
                 vertices::vertex_coords_t<T> c_coords{triangles_[i].c_.x_, triangles_[i].c_.y_, triangles_[i].c_.z_};
 
-                point::point_t<T> normal_ = triangles_[i].normal().norm();
+                data.vertices_.set_vertex(v_index + 0 * vertex_index_shift, a_coords, color);
+                data.vertices_.set_vertex(v_index + 1 * vertex_index_shift, b_coords, color);
+                data.vertices_.set_vertex(v_index + 2 * vertex_index_shift, c_coords, color);
+                
+                point::point_t normal_ = triangles_[i].normal().norm();
                 vertices::vertex_coords_t<T> normal{normal_.x_, normal_.y_, normal_.z_};
-
-                vertices.set_vertex(v_index + 0 * vertex_index_shift, a_coords, color, normal);
-                vertices.set_vertex(v_index + 1 * vertex_index_shift, b_coords, color, normal);
-                vertices.set_vertex(v_index + 2 * vertex_index_shift, c_coords, color, normal);
+                data.normals_.set_normal(n_index, normal);
             }
-            return vertices;
+
+            return data;
         }
     };
 

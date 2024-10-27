@@ -33,7 +33,7 @@ namespace window {
 
                         case user::window_event_e::NEW_SCENE: {
                                 sf::Vector2u size = window_.getSize();
-                                renderer.rebind_scene(scenes[user.get_number_scene()].get_vertices(),
+                                renderer.rebind_scene(scenes[user.get_number_scene()].get_data(),
                                                       size.x, size.y);
                             }
                             break;
@@ -43,7 +43,7 @@ namespace window {
                     }
                 }
 
-                renderer.render(user.get_perspective(), user.get_lookat());
+                renderer.render(user.get_user_direction(), user.get_perspective(), user.get_lookat());
                 window_.display();
             }
         }

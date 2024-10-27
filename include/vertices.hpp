@@ -1,12 +1,12 @@
 #pragma once
 
-#include "triangle.hpp"
 #include <GL/glew.h>
 #include <memory>
 
 namespace vertices {
 
-    const int TRIANGLE2VERTEX_SIZE = 27; // 3 * 3 coord & 3 * 3 color & 3 * 3 normal
+    const int TRIANGLE2VERTEX_SIZE = 18; // 3 * 3 coord & 3 * 3 color
+    const int TRIANGLE2NORMAL_SIZE = 3;  // 3 coord
 
     template <typename T = double>
     struct vertex_coords_t final {
@@ -36,19 +36,31 @@ namespace vertices {
         }
 
         template <typename T>
-        void set_vertex(int v_ind, vertex_coords_t<T>& coords,
-                        vertex_color_t<T>& color, vertex_coords_t<T>& normal) {
-            vertices_[v_ind + 0] = coords.x_;
-            vertices_[v_ind + 1] = coords.y_;
-            vertices_[v_ind + 2] = coords.z_;
+        void set_vertex(int ind, vertex_coords_t<T>& coords, vertex_color_t<T>& color) {
+            vertices_[ind + 0] = coords.x_;
+            vertices_[ind + 1] = coords.y_;
+            vertices_[ind + 2] = coords.z_;
 
-            vertices_[v_ind + 3] = color.x_;
-            vertices_[v_ind + 4] = color.y_;
-            vertices_[v_ind + 5] = color.z_;
+            vertices_[ind + 3] = color.x_;
+            vertices_[ind + 4] = color.y_;
+            vertices_[ind + 5] = color.z_;
+        }
+    };
 
-            vertices_[v_ind + 6] = normal.x_;
-            vertices_[v_ind + 7] = normal.y_;
-            vertices_[v_ind + 8] = normal.z_;
+    struct normals_t final {
+        int count_ = 0;
+        std::unique_ptr<GLfloat[]> normals_;
+
+    public:
+        normals_t(int count) : count_(count) {
+            normals_ = std::make_unique<GLfloat[]>(count);
+        }
+
+        template <typename T>
+        void set_normal(int ind, vertex_coords_t<T>& coords) {
+            normals_[ind + 0] = coords.x_;
+            normals_[ind + 1] = coords.y_;
+            normals_[ind + 2] = coords.z_;
         }
     };
 }

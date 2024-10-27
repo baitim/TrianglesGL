@@ -1,7 +1,7 @@
 #pragma once
 
 #include "shader.hpp"
-#include "vertices.hpp"
+#include "scene.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <bit>
@@ -21,6 +21,9 @@ namespace renderer {
         int width_  = 2048;
         int height_ = 2048;
         glm::mat4 depth_MVP_;
+        glm::vec3 light_direction_{-1, -1, -1};
+        glm::vec3 light_position_ { 2,  2,  2};
+        glm::mat4 depth_projection_matrix_ = glm::ortho<float>(-1.4, 1.4, -1.4, 1.4, 0.1, 5);
 
     private:
         void init_texture() {
@@ -43,12 +46,11 @@ namespace renderer {
         }
 
         void set_uniform_depth_MVP(GLuint program_id) {
-            glm::mat4 depthProjectionMatrix = glm::ortho<float>(-1.4, 1.4, -1.4, 1.4, 0.1, 5);
-            glm::mat4 depthViewMatrix = glm::lookAt(glm::vec3(2,2,2), glm::vec3(-1,-1,-1), glm::vec3(0,1,0));
-            glm::mat4 depthModelMatrix = glm::mat4(1.0);
-            depth_MVP_ = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
-            GLuint depth_MVP_id = glGetUniformLocation(program_id, "depth_MVP");
-            glUniformMatrix4fv(depth_MVP_id, 1, GL_FALSE, &depth_MVP_[0][0]);
+            glm::mat4 depth_view_matrix = glm::lookAt(light_position_, light_direction_, glm::vec3(0,1,0));
+            glm::mat4 depth_model_matrix = glm::mat4(1.0);
+            depth_MVP_ = depth_projection_matrix_ * depth_view_matrix * depth_model_matrix;
+            glUniformMatrix4fv(glGetUniformLocation(program_id, "depth_MVP"),
+                               1, GL_FALSE, &depth_MVP_[0][0]);
         }
 
     public:
@@ -64,8 +66,8 @@ namespace renderer {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
-        GLuint get_id() const { return id_; }
-
+        GLuint    get_id()        const { return id_; }
+        glm::vec3 get_light_dir() const { return light_direction_; }
         glm::mat4 get_depth_MVP() const { return depth_MVP_; }
     };
 
@@ -142,41 +144,38 @@ namespace renderer {
             
             glEnableVertexAttribArray(0);
             glEnableVertexAttribArray(1);
-            glEnableVertexAttribArray(2);
 
             size_t glfloat_sz = sizeof(GLfloat);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * glfloat_sz, std::bit_cast<void*>(0 * glfloat_sz));
-            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * glfloat_sz, std::bit_cast<void*>(3 * glfloat_sz));
-            glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * glfloat_sz, std::bit_cast<void*>(6 * glfloat_sz));
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * glfloat_sz, std::bit_cast<void*>(0 * glfloat_sz));
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * glfloat_sz, std::bit_cast<void*>(3 * glfloat_sz));
         }
 
         void set_uniform_time() const {
             auto elapsed_time = std::chrono::high_resolution_clock::now();
             std::chrono::duration<float> elapsed_seconds = elapsed_time - start_time_;
             float normalized_time = std::max(0.0f, std::min(0.2f, std::fabs(std::sin(1.5f * elapsed_seconds.count()) / 5.f)));
-            GLint location_time = glGetUniformLocation(program_id_, "time");
-            glUniform1f(location_time, normalized_time);
+            glUniform1f(glGetUniformLocation(program_id_, "time"), normalized_time);
         }
 
         void set_uniform_MVP(const glm::highp_mat4& user_perspective,
                              const glm::highp_mat4& user_lookat) const {
-            glm::mat4 Model = glm::mat4(1.0f);
-            glm::mat4 MVP   = user_perspective * user_lookat * Model;
-            GLuint MVP_id   = glGetUniformLocation(program_id_, "MVP");
-            glUniformMatrix4fv(MVP_id, 1, GL_FALSE, &MVP[0][0]);
+            glm::mat4 model = glm::mat4(1.0f);
+            glm::mat4 MVP   = user_perspective * user_lookat * model;
+            glUniformMatrix4fv(glGetUniformLocation(program_id_, "MVP"),
+                               1, GL_FALSE, &MVP[0][0]);
         }
 
         void set_uniform_depth_bias_MVP(const glm::highp_mat4& user_perspective,
                                         const glm::highp_mat4& user_lookat) const {
-            glm::mat4 biasMatrix(
+            glm::mat4 bias_matrix(
             0.5, 0.0, 0.0, 0.0,
             0.0, 0.5, 0.0, 0.0,
             0.0, 0.0, 0.5, 0.0,
             0.5, 0.5, 0.5, 1.0
             );
-            glm::mat4 depth_bias_MVP = biasMatrix * shadow_map_.get_depth_MVP();
-            GLuint depth_bias_MVP_id = glGetUniformLocation(program_id_, "depth_bias_MVP");
-            glUniformMatrix4fv(depth_bias_MVP_id, 1, GL_FALSE, &depth_bias_MVP[0][0]);
+            glm::mat4 depth_bias_MVP = bias_matrix * shadow_map_.get_depth_MVP();
+            glUniformMatrix4fv(glGetUniformLocation(program_id_, "depth_bias_MVP"),
+                               1, GL_FALSE, &depth_bias_MVP[0][0]);
         }
 
         void set_uniform_shadow_map() const {
@@ -185,8 +184,26 @@ namespace renderer {
             glUniform1i(glGetUniformLocation(program_id_, "shadow_map"), 0);
         }
 
-        void start_program(const vertices::vertices_t& vertices, int w_width, int w_height) {
-            bind_vertices(vertices);
+        void set_uniform_normals(const vertices::normals_t& normals) const {
+            glUniform3fv(glGetUniformLocation(program_id_, "normals"),
+                         normals.count_ / 3, normals.normals_.get());
+        }
+
+        void set_uniform_light_direction() const {
+            glm::vec3 light_dir = glm::normalize(shadow_map_.get_light_dir());
+            glUniform3f(glGetUniformLocation(program_id_, "light_dir"),
+                        light_dir.x, light_dir.y, light_dir.z);
+        }
+
+        void set_uniform_user_direction(const glm::vec3& user_direction) const {
+            glm::vec3 user_dir = glm::normalize(user_direction);
+            glUniform3f(glGetUniformLocation(program_id_, "user_dir"),
+                        user_dir.x, user_dir.y, user_dir.z);
+        }
+
+        void start_program(const scene::data2render_t& data2render, 
+                           int w_width, int w_height) {
+            bind_vertices(data2render.vertices_);
 
             load_shaders(shaders_.shadows_);
             glUseProgram(program_id_);
@@ -197,31 +214,36 @@ namespace renderer {
 
             resize(w_width, w_height);
             start_time_ = std::chrono::high_resolution_clock::now();
+
+            set_uniform_shadow_map();
+            set_uniform_normals(data2render.normals_);
+            set_uniform_light_direction();
         }
 
     public:
-        renderer_t(const shaders_t& shaders, const vertices::vertices_t& vertices,
+        renderer_t(const shaders_t& shaders, const scene::data2render_t& data2render,
                    int w_width, int w_height) :
-                   shaders_(shaders), count_vertices_(vertices.count_) {
+                   shaders_(shaders), count_vertices_(data2render.vertices_.count_) {
             init_gl();
-            start_program(vertices, w_width, w_height);
+            start_program(data2render, w_width, w_height);
         }
 
-        void render(const glm::highp_mat4& user_perspective,
+        void render(const glm::vec3&       user_direction,
+                    const glm::highp_mat4& user_perspective,
                     const glm::highp_mat4& user_lookat) const {
 
             set_uniform_time();
             set_uniform_MVP(user_perspective, user_lookat);
             set_uniform_depth_bias_MVP(user_perspective, user_lookat);
-            set_uniform_shadow_map();
+            set_uniform_user_direction(user_direction);
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glDrawArrays(GL_TRIANGLES, 0, count_vertices_);
         }
 
-        void rebind_scene(const vertices::vertices_t& vertices,int w_width, int w_height) {
-            count_vertices_ = vertices.count_;
-            start_program(vertices, w_width, w_height);
+        void rebind_scene(const scene::data2render_t& data2render, int w_width, int w_height) {
+            count_vertices_ = data2render.vertices_.count_;
+            start_program(data2render, w_width, w_height);
         }
 
         void resize(int width, int height) const {

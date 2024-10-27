@@ -140,6 +140,10 @@ namespace user {
             return glm::perspective(glm::radians(view_angle_), aspect_, z_near_, z_far_);
         }
 
+        glm::vec3 get_user_direction() const {
+            return direction_;
+        }
+
         int get_number_scene() const {
             return number_scene_;
         }
