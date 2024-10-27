@@ -16,7 +16,7 @@
     write <code>conan profile detect --force</code> in terminal
 
 4. Init dependencies <br>
-    write <code>conan install . --build=missing -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=True -s compiler.cppstd=gnu20</code> in terminal
+    write <code>conan install . --build=missing -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=True -s compiler.cppstd=gnu20</code> in terminal <br>
     maybe you will need these flags for the conan <code>-s build_type=Debug</code>
     
 5. Init submodules <br>
