@@ -64,6 +64,7 @@
 
 1. Tested project building in ubuntu:latest
 2. Changing the scene during execution
+2. Smart shadows
 
 ## Example
 <p align="center"><img src="https://github.com/baitim/TrianglesGL/blob/main/images/triangles_example.png" width="80%"></p>
