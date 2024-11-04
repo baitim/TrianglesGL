@@ -5,8 +5,13 @@
 
 namespace vertices {
 
-    const int TRIANGLE2VERTEX_SIZE = 18; // 3 * 3 coord & 3 * 3 color
-    const int TRIANGLE2NORMAL_SIZE = 3;  // 3 coord
+    const int VERTEX_SIZE          = 3;
+    const int COLOR_SIZE           = 3;
+    const int TRIANGLE2VERTEX_CNT  = 3;
+    const int TRIANGLE2COLORS_CNT  = 3;
+    const int TRIANGLE2VERTEX_SIZE =   VERTEX_SIZE * TRIANGLE2VERTEX_CNT
+                                     + COLOR_SIZE  * TRIANGLE2COLORS_CNT;
+    const int TRIANGLE2NORMAL_SIZE = 3;
 
     template <typename T = double>
     struct vertex_coords_t final {
