@@ -11,15 +11,9 @@ uniform sampler2D shadow_map;
 void main() {
     vec3 shadow_coord = shadow_coord_.xyz / shadow_coord_.w;
     float visability  = 1.0;
-    float visability_outside      = 0.1;
     float visability_from_another = 0.3;
     float bias = 0.05f;
-    if (shadow_coord.x > 1.0 || shadow_coord.x < 0.0 ||
-        shadow_coord.y > 1.0 || shadow_coord.y < 0.0 ||
-        shadow_coord.z > 1.0 || shadow_coord.z < 0.0)
-        visability = visability_outside;
-    else if((texture(shadow_map, shadow_coord.xy).r < shadow_coord.z - bias) ||
-            (is_dark_side > 0.5))
+    if((texture(shadow_map, shadow_coord.xy).r < shadow_coord.z - bias) || (is_dark_side > 0.5))
         visability = visability_from_another;
     else
         visability = abs(light_angle) * (visability - visability_from_another) / visability + visability_from_another;
