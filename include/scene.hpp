@@ -97,17 +97,32 @@ namespace scene {
         return files;
     }
 
-    std::vector<scene::scene_t<float>> get_scenes(const std::filesystem::path& relative_path) {
-        std::string file{__FILE__};
-        std::filesystem::path dir = file.substr(0, file.rfind("/"));
-        std::filesystem::path scenes_path = dir / relative_path;
-
+    std::vector<scene::scene_t<float>> get_scenes_default(const std::filesystem::path& scenes_path) {
         std::vector<std::string> scenes_data = get_sorted_files(scenes_path);
         std::vector<scene::scene_t<float>> scenes(scenes_data.size());
         for (int i = 0, end = scenes_data.size(); i < end; ++i) {
             std::ifstream data(scenes_data[i]);
             data >> scenes[i];
             data.close();
+        }
+        return scenes;
+    }
+
+    std::vector<scene::scene_t<float>> get_scenes_cmd(const std::string& file) {
+        std::vector<scene::scene_t<float>> scenes(1);
+        std::ifstream data(file);
+        data >> scenes[0];
+        data.close();
+        return scenes;
+    }
+
+    std::vector<scene::scene_t<float>> get_scenes(int argc, char* argv[],
+                                                  const std::filesystem::path& scenes_path) {
+        std::vector<scene::scene_t<float>> scenes;
+        if (argc == 2) {
+            scenes = scene::get_scenes_cmd(argv[1]);
+        } else {
+            scenes = scene::get_scenes_default(scenes_path);
         }
         return scenes;
     }

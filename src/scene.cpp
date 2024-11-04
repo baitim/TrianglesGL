@@ -1,6 +1,13 @@
 #include "window.hpp"
 
-int main() {
+int main(int argc, char* argv[]) {
+    if (argc > 2) {
+        std::cout << print_red("Invalid argument:\nUse one of these options:\n" \
+                               "\t1) argc = 2, argv[1] = name of file\n"        \
+                               "\t2) default scenes without your file\n");
+        return 1;
+    }
+
     std::string file{__FILE__};
     std::filesystem::path dir = file.substr(0, file.rfind("/"));
 
@@ -10,7 +17,7 @@ int main() {
     
     std::vector<scene::scene_t<float>> scenes;
     try {
-        scenes = scene::get_scenes(dir / "../scenes/scenes_in");
+        scenes = scene::get_scenes(argc, argv, dir / "../scenes/scenes_in");
     } catch (const char* error_message) {
         std::cout << print_red(error_message) << "\n";
         return 1;
