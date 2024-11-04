@@ -17,10 +17,7 @@ namespace scene {
 
     struct data2render_t final {
         vertices::vertices_t vertices_;
-        vertices::normals_t  normals_;
-
-        data2render_t(int count) : vertices_(count * vertices::TRIANGLE2VERTEX_SIZE),
-                                   normals_ (count * vertices::TRIANGLE2NORMAL_SIZE) {}
+        data2render_t(int count) : vertices_(count * vertices::TRIANGLE2VERTEX_SIZE) {}
     };
 
     template <typename T = double>
@@ -41,27 +38,22 @@ namespace scene {
             data2render_t data{count_};
             int vertex_index_shift = vertices::TRIANGLE2VERTEX_SIZE / 3;
             
-            for (int i = 0, n_index = 0, v_index = 0;
-                 i < count_;
-                 ++i, n_index += vertices::TRIANGLE2NORMAL_SIZE, v_index += vertices::TRIANGLE2VERTEX_SIZE) {
+            for (int i = 0, v_index = 0; i < count_; ++i, v_index += vertices::TRIANGLE2VERTEX_SIZE) {
 
-                vertices::vertex_color_t<T> color;
+                T color = 0.f;
                 if (triangles_types_[i] == triangle_type_e::TRIANGLE_TYPE_INTERSECT)
-                    color.set(1.f, 0.f, 0.f);
-                else if (triangles_types_[i] == triangle_type_e::TRIANGLE_TYPE_NOT_INTERSECT)
-                    color.set(0.f, 0.f, 1.f);
+                    color = 1.f;
 
                 vertices::vertex_coords_t<T> a_coords{triangles_[i].a_.x_, triangles_[i].a_.y_, triangles_[i].a_.z_};
                 vertices::vertex_coords_t<T> b_coords{triangles_[i].b_.x_, triangles_[i].b_.y_, triangles_[i].b_.z_};
                 vertices::vertex_coords_t<T> c_coords{triangles_[i].c_.x_, triangles_[i].c_.y_, triangles_[i].c_.z_};
 
-                data.vertices_.set_vertex(v_index + 0 * vertex_index_shift, a_coords, color);
-                data.vertices_.set_vertex(v_index + 1 * vertex_index_shift, b_coords, color);
-                data.vertices_.set_vertex(v_index + 2 * vertex_index_shift, c_coords, color);
-                
                 point::point_t normal_ = triangles_[i].normal().norm();
                 vertices::vertex_coords_t<T> normal{normal_.x_, normal_.y_, normal_.z_};
-                data.normals_.set_normal(n_index, normal);
+
+                data.vertices_.set_vertex(v_index + 0 * vertex_index_shift, color, a_coords, normal);
+                data.vertices_.set_vertex(v_index + 1 * vertex_index_shift, color, b_coords, normal);
+                data.vertices_.set_vertex(v_index + 2 * vertex_index_shift, color, c_coords, normal);
             }
 
             return data;

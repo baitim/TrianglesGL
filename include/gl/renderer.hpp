@@ -144,10 +144,12 @@ namespace renderer {
             
             glEnableVertexAttribArray(0);
             glEnableVertexAttribArray(1);
+            glEnableVertexAttribArray(2);
 
             size_t glfloat_sz = sizeof(GLfloat);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * glfloat_sz, std::bit_cast<void*>(0 * glfloat_sz));
-            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * glfloat_sz, std::bit_cast<void*>(3 * glfloat_sz));
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * glfloat_sz, std::bit_cast<void*>(0 * glfloat_sz));
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * glfloat_sz, std::bit_cast<void*>(3 * glfloat_sz));
+            glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 7 * glfloat_sz, std::bit_cast<void*>(6 * glfloat_sz));
         }
 
         void set_uniform_time() const {
@@ -184,9 +186,9 @@ namespace renderer {
             glUniform1i(glGetUniformLocation(program_id_, "shadow_map"), 0);
         }
 
-        void set_uniform_normals(const vertices::normals_t& normals) const {
-            glUniform3fv(glGetUniformLocation(program_id_, "normals"),
-                         normals.count_ / 3, normals.normals_.get());
+        void set_uniform_colors() const {
+            glm::vec3 colors[2] = {{0.f, 0.f, 1.f}, {1.f, 0.f, 0.f}};
+            glUniform3fv(glGetUniformLocation(program_id_, "colors"), 2, &colors[0][0]);
         }
 
         void set_uniform_light_direction() const {
@@ -216,7 +218,7 @@ namespace renderer {
             start_time_ = std::chrono::high_resolution_clock::now();
 
             set_uniform_shadow_map();
-            set_uniform_normals(data2render.normals_);
+            set_uniform_colors();
             set_uniform_light_direction();
         }
 
