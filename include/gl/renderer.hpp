@@ -107,30 +107,26 @@ namespace renderer {
             }
         }
 
-        void create_shaders_program(const std::vector<GLuint>& shaders_id) {
+        void delete_attached_shaders() {
+            GLsizei max_count = 2;
+            GLsizei count;
+            GLuint  attached_shaders[max_count];
+            glGetAttachedShaders(program_id_, max_count, &count, attached_shaders);
+            for (int i = 0; i < count; ++i)
+                glDeleteShader(attached_shaders[i]);
+        }
+
+        void load_shaders(const std::vector<std::pair<std::string, GLenum>>& shaders) {
             program_id_ = glCreateProgram();
-            for (int i = 0, end = shaders_id.size(); i < end; ++i)
-                glAttachShader(program_id_, shaders_id[i]);
+            for (int i = 0, end = shaders.size(); i < end; ++i)
+                glAttachShader(program_id_, shader::shader_t{shaders[i].first, shaders[i].second}.get_id());
             glLinkProgram(program_id_);
 
             GLint result;
             glGetProgramiv(program_id_, GL_LINK_STATUS, &result);
             process_creation_result(result);
-        }
 
-        void delete_shaders(const std::vector<GLuint>& shaders_id) const {
-            for (int i = 0, end = shaders_id.size(); i < end; ++i)
-                glDeleteShader(shaders_id[i]);
-        }
-
-        void load_shaders(const std::vector<std::pair<std::string, GLenum>>& shaders) {
-            std::vector<GLuint> shaders_id;
-            for (int i = 0, end = shaders.size(); i < end; ++i) {
-                shader::shader_t shader{shaders[i].first, shaders[i].second};
-                shaders_id.push_back(shader.get_id());
-            }
-            create_shaders_program(shaders_id);
-            delete_shaders(shaders_id);
+            delete_attached_shaders();
         }
 
         void bind_vertices(const vertices::vertices_t& vertices) const {
