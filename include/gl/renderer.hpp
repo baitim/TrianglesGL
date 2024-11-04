@@ -139,17 +139,18 @@ namespace renderer {
             glGenBuffers(1, &VBO);
             glBindVertexArray(VAO);
             glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferData(GL_ARRAY_BUFFER, count_vertices_ * sizeof(*vertices.vertices_.get()),
+            glBufferData(GL_ARRAY_BUFFER, vertices.count_ * sizeof(*vertices.vertices_.get()),
                          vertices.vertices_.get(), GL_STATIC_DRAW);
             
             glEnableVertexAttribArray(0);
             glEnableVertexAttribArray(1);
             glEnableVertexAttribArray(2);
 
+            size_t vertex_size = sizeof(*vertices.vertices_.get());
             size_t glfloat_sz = sizeof(GLfloat);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * glfloat_sz, std::bit_cast<void*>(0 * glfloat_sz));
-            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * glfloat_sz, std::bit_cast<void*>(3 * glfloat_sz));
-            glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 7 * glfloat_sz, std::bit_cast<void*>(6 * glfloat_sz));
+            glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, vertex_size, std::bit_cast<void*>(0 * glfloat_sz));
+            glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE, vertex_size, std::bit_cast<void*>(3 * glfloat_sz));
+            glVertexAttribIPointer(2, 1, GL_INT,             vertex_size, std::bit_cast<void*>(6 * glfloat_sz));
         }
 
         void set_uniform_time() const {

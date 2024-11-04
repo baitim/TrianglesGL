@@ -17,7 +17,7 @@ namespace scene {
 
     struct data2render_t final {
         vertices::vertices_t vertices_;
-        data2render_t(int count) : vertices_(count * vertices::TRIANGLE2VERTEX_SIZE) {}
+        data2render_t(int count) : vertices_(count * vertices::VERTEX_CNT) {}
     };
 
     template <typename T = double>
@@ -36,13 +36,11 @@ namespace scene {
 
         data2render_t get_data() const {
             data2render_t data{count_};
-            int vertex_index_shift = vertices::TRIANGLE2VERTEX_SIZE / 3;
-            
-            for (int i = 0, v_index = 0; i < count_; ++i, v_index += vertices::TRIANGLE2VERTEX_SIZE) {
-
-                T color = 0.f;
+        
+            for (int i = 0, v_index = 0; i < count_; ++i, v_index += vertices::VERTEX_CNT) {
+                int color = 0;
                 if (triangles_types_[i] == triangle_type_e::TRIANGLE_TYPE_INTERSECT)
-                    color = 1.f;
+                    color = 1;
 
                 vertices::vertex_coords_t<T> a_coords{triangles_[i].a_.x_, triangles_[i].a_.y_, triangles_[i].a_.z_};
                 vertices::vertex_coords_t<T> b_coords{triangles_[i].b_.x_, triangles_[i].b_.y_, triangles_[i].b_.z_};
@@ -51,9 +49,9 @@ namespace scene {
                 point::point_t normal_ = triangles_[i].normal().norm();
                 vertices::vertex_coords_t<T> normal{normal_.x_, normal_.y_, normal_.z_};
 
-                data.vertices_.set_vertex(v_index + 0 * vertex_index_shift, color, a_coords, normal);
-                data.vertices_.set_vertex(v_index + 1 * vertex_index_shift, color, b_coords, normal);
-                data.vertices_.set_vertex(v_index + 2 * vertex_index_shift, color, c_coords, normal);
+                data.vertices_.set_vertex(v_index + 0, color, a_coords, normal);
+                data.vertices_.set_vertex(v_index + 1, color, b_coords, normal);
+                data.vertices_.set_vertex(v_index + 2, color, c_coords, normal);
             }
 
             return data;

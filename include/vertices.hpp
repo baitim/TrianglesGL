@@ -5,15 +5,16 @@
 
 namespace vertices {
 
-    const int VERTEX_SIZE          = 3;
-    const int NORMAL_SIZE          = 3;
-    const int COLOR_SIZE           = 1;
-    const int TRIANGLE2VERTEX_CNT  = 3;
-    const int TRIANGLE2NORMAL_CNT  = 3;
-    const int TRIANGLE2COLORS_CNT  = 3;
-    const int TRIANGLE2VERTEX_SIZE =   VERTEX_SIZE * TRIANGLE2VERTEX_CNT
-                                     + NORMAL_SIZE * TRIANGLE2NORMAL_CNT
-                                     + COLOR_SIZE  * TRIANGLE2COLORS_CNT;
+    const int VERTEX_SIZE = 3;
+    const int NORMAL_SIZE = 3;
+    const int COLOR_SIZE  = 1;
+    const int VERTEX_CNT  = 3;
+    const int NORMAL_CNT  = 3;
+    const int COLOR_CNT   = 3;
+    const int TRIANGLE2VERTEX = VERTEX_SIZE * VERTEX_CNT;
+    const int TRIANGLE2NORMAL = NORMAL_SIZE * NORMAL_CNT;
+    const int TRIANGLE2COLOR  = COLOR_SIZE  * COLOR_CNT;
+    const int TRIANGLE2VERTEX_SIZE = TRIANGLE2VERTEX + TRIANGLE2NORMAL;
 
     template <typename T = double>
     struct vertex_coords_t final {
@@ -21,28 +22,35 @@ namespace vertices {
         vertex_coords_t(T x, T y, T z) : x_(x), y_(y), z_(z) {}
     };
 
+    struct vertex2render_t {
+        GLfloat coord [3];
+        GLfloat normal[3];
+        GLint   color [1];
+    };
+
     struct vertices_t final {
         int count_ = 0;
-        std::unique_ptr<GLfloat[]> vertices_;
+        std::unique_ptr<vertex2render_t[]> vertices_;
 
     public:
         vertices_t(int count) : count_(count) {
-            vertices_ = std::make_unique<GLfloat[]>(count);
+            vertices_ = std::make_unique<vertex2render_t[]>(count);
         }
 
         template <typename T>
-        void set_vertex(int ind, T color,
+        void set_vertex(int ind, int color,
                         const vertex_coords_t<T>& coords,
                         const vertex_coords_t<T>& normal) {
-            vertices_[ind + 0] = coords.x_;
-            vertices_[ind + 1] = coords.y_;
-            vertices_[ind + 2] = coords.z_;
+            vertex2render_t& vertex = vertices_[ind];
+            vertex.coord[0] = coords.x_;
+            vertex.coord[1] = coords.y_;
+            vertex.coord[2] = coords.z_;
 
-            vertices_[ind + 3] = normal.x_;
-            vertices_[ind + 4] = normal.y_;
-            vertices_[ind + 5] = normal.z_;
+            vertex.normal[0] = normal.x_;
+            vertex.normal[1] = normal.y_;
+            vertex.normal[2] = normal.z_;
 
-            vertices_[ind + 6] = color;
+            vertex.color[0] = color;
         }
     };
 }
