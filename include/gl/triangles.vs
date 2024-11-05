@@ -1,7 +1,5 @@
 #version 330 core
 
-const int NORMALS_SIZE = 2000;
-
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;
 layout(location = 2) in int  color;

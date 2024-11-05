@@ -42,7 +42,7 @@ namespace scene {
         char check_is_dark_side(const glm::vec3& light_dir, const triangle::triangle_t<T>& t) const {
             point::point_t<T> normal_by_cross = point::cross_product(t.b_ - t.a_, t.c_ - t.a_);
             point::point_t<T> light_direction = {light_dir[0], light_dir[1], light_dir[2]};
-            return point::dot(light_direction, normal_by_cross) > 0;
+            return point::dot(light_direction, normal_by_cross) < 0;
         }
 
     public:
