@@ -8,10 +8,10 @@ namespace window {
     class window_t final {
         sf::Window window_;
 
-        void on_event(const std::vector<scene::scene_t<float>>& scenes,
-                      user::window_event_e  response,
-                      renderer::renderer_t& renderer,
-                      user::user_t&         user) {
+        void update_on_event(const std::vector<scene::scene_t<float>>& scenes,
+                             user::window_event_e  response,
+                             renderer::renderer_t& renderer,
+                             user::user_t&         user) {
 
             sf::Vector2u size = window_.getSize();
             switch (response) {
@@ -30,6 +30,10 @@ namespace window {
             }
         }
 
+        void update_default(user::user_t& user) {
+            user.update_default();
+        }
+
     public:
         window_t(const sf::VideoMode& window_video_mode, const std::string& window_name,
                  const sf::ContextSettings& context) {
@@ -45,8 +49,9 @@ namespace window {
                     user::window_event_e response = user.event_callback(event, window_);
                     if (response == user::window_event_e::EXIT)
                         return;
-                    on_event(scenes, response, renderer, user);
+                    update_on_event(scenes, response, renderer, user);
                 }
+                update_default(user);
 
                 renderer.render(user.get_user_direction(), user.get_perspective(), user.get_lookat());
                 window_.display();

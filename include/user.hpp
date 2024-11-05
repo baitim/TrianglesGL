@@ -19,7 +19,6 @@ namespace user {
 
         float horizontal_angle_   = M_PI;
         float vertical_angle_     = 0.0f;
-        const float speed_rotate_ = 0.005f;
 
         float aspect_     = 16.0f / 9.0f;
         float z_near_     = 0.1f;
@@ -29,15 +28,20 @@ namespace user {
         float max_view_angle_ = 60.0f;
         const float aspect_zoom_speed_ = 1.1f;
 
-        bool is_mouse_active_ = false;
+              float     speed_rotate_ = 0.f;
+        const float   d_speed_rotate_ = 0.001f;
+        const float max_speed_rotate_ = 0.005f;
+        int  last_step_ = 0;
+        bool is_mouse_active_           = false;
         bool is_mouse_setted_in_center_ = false;
-        sf::Vector2i mouse_position_{0, 0};
-        int mouse_borders_ = 10;
+        sf::Vector2i mouse_position_ {0, 0};
+        sf::Vector2i mouse_direction_{0, 0};
+        int mouse_borders_ = 20;
 
         glm::vec3 direction_;
         glm::vec3 right_;
 
-        int number_scene_  = 0;
+        int number_scene_ = 0;
         int count_scenes_ = 0;
 
         void update_direction_() {
@@ -69,12 +73,23 @@ namespace user {
             }
         }
 
-        void update_mouse(bool is_mouse_was_active, const sf::Window& window) {
+        void update_mouse(const sf::Window& window) {
             sf::Vector2i mouse_position = sf::Mouse::getPosition(window);
             if (is_mouse_active_) {
-                if (is_mouse_was_active && !is_mouse_setted_in_center_) {
+                if (!is_mouse_setted_in_center_) {
                     horizontal_angle_ -= speed_rotate_ * (mouse_position.x - mouse_position_.x);
                     vertical_angle_   -= speed_rotate_ * (mouse_position.y - mouse_position_.y);
+
+                    last_step_ =   abs(mouse_position.x - mouse_position_.x)
+                                 + abs(mouse_position.y - mouse_position_.y);
+
+                    if (mouse_position.x > mouse_position_.x) mouse_direction_.x =  1;
+                    if (mouse_position.y > mouse_position_.y) mouse_direction_.y =  1;
+                    if (mouse_position.x < mouse_position_.x) mouse_direction_.x = -1;
+                    if (mouse_position.y < mouse_position_.y) mouse_direction_.y = -1;
+
+                    if (last_step_)
+                        speed_rotate_ = std::min(max_speed_rotate_, speed_rotate_ + d_speed_rotate_);
                 }
                 is_mouse_setted_in_center_ = false;
                 mouse_position_ = mouse_position;
@@ -94,7 +109,6 @@ namespace user {
             update_direction_();
             update_right_();
 
-            bool is_mouse_was_active = is_mouse_active_;
             switch (event.type) {
                 case sf::Event::Closed:
                     return window_event_e::EXIT;
@@ -144,11 +158,24 @@ namespace user {
                 default:
                     break;
             }
-            update_mouse(is_mouse_was_active, window);
+            update_mouse(window);
 
             update_direction_();
             update_right_();
             return window_event_e::DEFAULT;
+        }
+
+        void update_default() {
+            if (!is_mouse_active_) {
+                float normilize_by_last_step = static_cast<float>(last_step_) / static_cast<float>(mouse_borders_);
+                horizontal_angle_ -= normilize_by_last_step * speed_rotate_ * mouse_direction_.x;
+                vertical_angle_   -= normilize_by_last_step * speed_rotate_ * mouse_direction_.y;
+                speed_rotate_ = std::max(0.f, speed_rotate_ - d_speed_rotate_);
+                if (real_numbers::is_real_eq(speed_rotate_, 0.f)) {
+                    mouse_direction_ = {0, 0};
+                    last_step_ = 0;
+                }
+            }
         }
 
         void set_aspect(int width, int height) {
