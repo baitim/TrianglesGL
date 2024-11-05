@@ -38,7 +38,7 @@ namespace scene {
             data2render_t data{count_};
         
             for (int i = 0, v_index = 0; i < count_; ++i, v_index += vertices::VERTEX_CNT) {
-                int color = 0;
+                char color = 0;
                 if (triangles_types_[i] == triangle_type_e::TRIANGLE_TYPE_INTERSECT)
                     color = 1;
 

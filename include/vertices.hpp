@@ -25,7 +25,7 @@ namespace vertices {
     struct vertex2render_t {
         GLfloat coord [3];
         GLfloat normal[3];
-        GLint   color [1];
+        GLbyte  color;
     };
 
     struct vertices_t final {
@@ -38,7 +38,7 @@ namespace vertices {
         }
 
         template <typename T>
-        void set_vertex(int ind, int color,
+        void set_vertex(int ind, char color,
                         const vertex_coords_t<T>& coords,
                         const vertex_coords_t<T>& normal) {
             vertex2render_t& vertex = vertices_[ind];
@@ -50,7 +50,7 @@ namespace vertices {
             vertex.normal[1] = normal.y_;
             vertex.normal[2] = normal.z_;
 
-            vertex.color[0] = color;
+            vertex.color = color;
         }
     };
 }

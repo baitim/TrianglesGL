@@ -146,7 +146,7 @@ namespace renderer {
             size_t glfloat_sz = sizeof(GLfloat);
             glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, vertex_size, std::bit_cast<void*>(0 * glfloat_sz));
             glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE, vertex_size, std::bit_cast<void*>(3 * glfloat_sz));
-            glVertexAttribIPointer(2, 1, GL_INT,             vertex_size, std::bit_cast<void*>(6 * glfloat_sz));
+            glVertexAttribIPointer(2, 1, GL_BYTE,            vertex_size, std::bit_cast<void*>(6 * glfloat_sz));
         }
 
         void set_uniform_time() const {
