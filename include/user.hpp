@@ -124,7 +124,7 @@ namespace user {
                user_position_(user_position), speed_(speed),
                v(horizontal_angle, vertical_angle, z_near, z_far), count_scenes_(count_scenes) {}
 
-        window_event_e event_callback(const sf::Event& event, const sf::Window& window) {
+        window_event_e event_callback(const sf::Event& event, sf::Window& window) {
             v.update();
 
             switch (event.type) {
@@ -164,6 +164,7 @@ namespace user {
                             break;
                         case sf::Keyboard::Q:
                             m.is_mouse_active_ = !m.is_mouse_active_;
+                            window.setMouseCursorVisible(!m.is_mouse_active_);
                             break;
                         case sf::Keyboard::E:
                             number_scene_ = (number_scene_ + 1) % count_scenes_;
