@@ -5,6 +5,7 @@ const int NORMALS_SIZE = 2000;
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;
 layout(location = 2) in int  color;
+layout(location = 3) in int  is_dark;
 
 uniform vec3 user_dir;
 uniform vec3 light_dir;
@@ -23,8 +24,5 @@ void main() {
     shadow_coord_ = depth_bias_MVP * vec4(position, 1.0);
 
     light_angle = dot(light_dir, normal);
-    if(dot(user_dir, normal) * light_angle < 0)
-        is_dark_side = 1.0;
-    else
-        is_dark_side = 0.0;
+    is_dark_side = is_dark;
 }

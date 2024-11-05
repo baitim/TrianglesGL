@@ -2,6 +2,8 @@
 
 #include "octree.hpp"
 #include "vertices.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
 #include <string>
 #include <filesystem>
@@ -15,9 +17,20 @@ namespace scene {
         TRIANGLE_TYPE_INTERSECT
     };
 
+    struct light_t final {
+        int width_  = 2048;
+        int height_ = 2048;
+        glm::mat4 depth_MVP_;
+        glm::vec3 light_direction_{-1, -1, -1};
+        glm::vec3 light_position_ { 2,  2,  2};
+        glm::vec3 light_up_       { 0,  1,  0};
+        glm::mat4 depth_projection_matrix_ = glm::ortho<float>(-1.4, 1.4, -1.4, 1.4, 0.1, 5);
+    };
+
     struct data2render_t final {
         vertices::vertices_t vertices_;
-        data2render_t(int count) : vertices_(count * vertices::VERTEX_CNT) {}
+        light_t light_;
+        data2render_t(int count) : vertices_(count * 3) {}
     };
 
     template <typename T = double>
@@ -25,6 +38,12 @@ namespace scene {
         int count_ = 0;
         std::vector<triangle::triangle_t<T>> triangles_;
         std::vector<triangle_type_e> triangles_types_;
+
+        char check_is_dark_side(const glm::vec3& light_dir, const triangle::triangle_t<T>& t) const {
+            point::point_t<T> normal_by_cross = point::cross_product(t.b_ - t.a_, t.c_ - t.a_);
+            point::point_t<T> light_direction = {light_dir[0], light_dir[1], light_dir[2]};
+            return point::dot(light_direction, normal_by_cross) > 0;
+        }
 
     public:
         void set_types() {
@@ -37,10 +56,12 @@ namespace scene {
         data2render_t get_data() const {
             data2render_t data{count_};
         
-            for (int i = 0, v_index = 0; i < count_; ++i, v_index += vertices::VERTEX_CNT) {
+            for (int i = 0, v_index = 0; i < count_; ++i, v_index += 3) {
                 char color = 0;
                 if (triangles_types_[i] == triangle_type_e::TRIANGLE_TYPE_INTERSECT)
                     color = 1;
+
+                char is_dark = check_is_dark_side(data.light_.light_direction_, triangles_[i]);
 
                 vertices::vertex_coords_t<T> a_coords{triangles_[i].a_.x_, triangles_[i].a_.y_, triangles_[i].a_.z_};
                 vertices::vertex_coords_t<T> b_coords{triangles_[i].b_.x_, triangles_[i].b_.y_, triangles_[i].b_.z_};
@@ -49,9 +70,9 @@ namespace scene {
                 point::point_t normal_ = triangles_[i].normal().norm();
                 vertices::vertex_coords_t<T> normal{normal_.x_, normal_.y_, normal_.z_};
 
-                data.vertices_.set_vertex(v_index + 0, color, a_coords, normal);
-                data.vertices_.set_vertex(v_index + 1, color, b_coords, normal);
-                data.vertices_.set_vertex(v_index + 2, color, c_coords, normal);
+                data.vertices_.set_vertex(v_index + 0, color, is_dark, a_coords, normal);
+                data.vertices_.set_vertex(v_index + 1, color, is_dark, b_coords, normal);
+                data.vertices_.set_vertex(v_index + 2, color, is_dark, c_coords, normal);
             }
 
             return data;
@@ -73,6 +94,19 @@ namespace scene {
         for (int i = 0; i < count; ++i)
             is >> sc.triangles_[i];
         sc.set_types();
+
+        count *= 2;
+        sc.count_ = count;
+        sc.triangles_.resize(count);
+        sc.triangles_types_.resize(count, triangle_type_e::TRIANGLE_TYPE_NOT_INTERSECT);
+
+        int count_half = count / 2;
+        for (int i = 0; i < count_half; ++i) {
+            int shift_i = count_half + i;
+            sc.triangles_      [shift_i] = sc.triangles_      [i];
+            sc.triangles_types_[shift_i] = sc.triangles_types_[i];
+            std::swap(sc.triangles_[shift_i].b_, sc.triangles_[shift_i].c_);
+        }
 
         return is;
     }

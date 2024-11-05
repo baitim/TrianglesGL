@@ -2,10 +2,9 @@
 
 #include "shader.hpp"
 #include "scene.hpp"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <bit>
 #include <chrono>
+#include <cstddef>
 
 namespace renderer {
     struct shaders_t final {
@@ -18,19 +17,15 @@ namespace renderer {
 
     class shadow_map_t final {
         GLuint id_;
-        int width_  = 2048;
-        int height_ = 2048;
         glm::mat4 depth_MVP_;
-        glm::vec3 light_direction_{-1, -1, -1};
-        glm::vec3 light_position_ { 2,  2,  2};
-        glm::mat4 depth_projection_matrix_ = glm::ortho<float>(-1.4, 1.4, -1.4, 1.4, 0.1, 5);
+        glm::vec3 light_direction_;
 
     private:
-        void init_texture() {
+        void init_texture(int width, int height) {
             glGenTextures(1, &id_);
             glBindTexture(GL_TEXTURE_2D, id_);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width_,
-                         height_, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width,
+                         height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -45,22 +40,24 @@ namespace renderer {
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, id_, 0);
         }
 
-        void set_uniform_depth_MVP(GLuint program_id) {
-            glm::mat4 depth_view_matrix = glm::lookAt(light_position_, light_direction_, glm::vec3(0,1,0));
+        void set_uniform_depth_MVP(const scene::light_t& l, GLuint program_id) {
+            glm::mat4 depth_view_matrix = glm::lookAt(l.light_position_, l.light_direction_, l.light_up_);
             glm::mat4 depth_model_matrix = glm::mat4(1.0);
-            depth_MVP_ = depth_projection_matrix_ * depth_view_matrix * depth_model_matrix;
+            depth_MVP_ = l.depth_projection_matrix_ * depth_view_matrix * depth_model_matrix;
             glUniformMatrix4fv(glGetUniformLocation(program_id, "depth_MVP"),
                                1, GL_FALSE, &depth_MVP_[0][0]);
         }
 
     public:
-        void init(GLuint program_id, int count_vertices) {
-            init_texture();
+        void init(const scene::light_t& light, GLuint program_id, int count_vertices) {
+            light_direction_ = light.light_direction_;
+
+            init_texture(light.width_, light.height_);
             GLuint shadows_frame_buffer;
             set_buffer(shadows_frame_buffer);
-            set_uniform_depth_MVP(program_id);
+            set_uniform_depth_MVP(light, program_id);
 
-            glViewport(0, 0, width_, height_);
+            glViewport(0, 0, light.width_, light.height_);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glDrawArrays(GL_TRIANGLES, 0, count_vertices);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -87,6 +84,7 @@ namespace renderer {
             }
 
             glEnable(GL_DEPTH_TEST);
+            glEnable(GL_CULL_FACE);
             glDepthFunc(GL_LESS);
             glDepthMask(GL_TRUE);
 
@@ -141,12 +139,17 @@ namespace renderer {
             glEnableVertexAttribArray(0);
             glEnableVertexAttribArray(1);
             glEnableVertexAttribArray(2);
+            glEnableVertexAttribArray(3);
 
             size_t vertex_size = sizeof(*vertices.vertices_.get());
-            size_t glfloat_sz = sizeof(GLfloat);
-            glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, vertex_size, std::bit_cast<void*>(0 * glfloat_sz));
-            glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE, vertex_size, std::bit_cast<void*>(3 * glfloat_sz));
-            glVertexAttribIPointer(2, 1, GL_BYTE,            vertex_size, std::bit_cast<void*>(6 * glfloat_sz));
+            void* coord_offset   = std::bit_cast<void*>(offsetof(vertices::vertex2render_t, coord));
+            void* normal_offset  = std::bit_cast<void*>(offsetof(vertices::vertex2render_t, normal));
+            void* color_offset   = std::bit_cast<void*>(offsetof(vertices::vertex2render_t, color));
+            void* is_dark_offset = std::bit_cast<void*>(offsetof(vertices::vertex2render_t, is_dark));
+            glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, vertex_size, coord_offset);
+            glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE, vertex_size, normal_offset);
+            glVertexAttribIPointer(2, 1, GL_BYTE,            vertex_size, color_offset);
+            glVertexAttribIPointer(3, 1, GL_BYTE,            vertex_size, is_dark_offset);
         }
 
         void set_uniform_time() const {
@@ -202,11 +205,12 @@ namespace renderer {
 
         void start_program(const scene::data2render_t& data2render, 
                            int w_width, int w_height) {
+            count_vertices_ = data2render.vertices_.count_;
             bind_vertices(data2render.vertices_);
 
             load_shaders(shaders_.shadows_);
             glUseProgram(program_id_);
-            shadow_map_.init(program_id_, count_vertices_);
+            shadow_map_.init(data2render.light_, program_id_, count_vertices_);
 
             load_shaders(shaders_.triangles_);
             glUseProgram(program_id_);
@@ -221,8 +225,7 @@ namespace renderer {
 
     public:
         renderer_t(const shaders_t& shaders, const scene::data2render_t& data2render,
-                   int w_width, int w_height) :
-                   shaders_(shaders), count_vertices_(data2render.vertices_.count_) {
+                   int w_width, int w_height) : shaders_(shaders) {
             init_gl();
             start_program(data2render, w_width, w_height);
         }
@@ -241,7 +244,6 @@ namespace renderer {
         }
 
         void rebind_scene(const scene::data2render_t& data2render, int w_width, int w_height) {
-            count_vertices_ = data2render.vertices_.count_;
             start_program(data2render, w_width, w_height);
         }
 
