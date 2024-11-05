@@ -2,19 +2,18 @@
 
 int main(int argc, char* argv[]) {
     if (argc > 2) {
-        std::cout << print_red("Invalid argument:\nUse one of these options:\n" \
+        std::cout << print_red("Invalid argument.\nUse one of these options:\n" \
                                "\t1) argc = 2, argv[1] = name of file\n"        \
                                "\t2) default scenes without your file\n");
         return 1;
     }
 
-    std::string file{__FILE__};
-    std::filesystem::path dir = file.substr(0, file.rfind("/"));
-
     int w_width  = 800;
     int w_height = 600;
-    window::window_t window(sf::VideoMode(w_width, w_height), "Triangles", sf::ContextSettings(24, 8, 0, 3, 3));
-    
+    window::window_t window(sf::VideoMode(w_width, w_height), "Triangles", sf::ContextSettings(24, 8, 0, 3, 3));    
+
+    std::string file{__FILE__};
+    std::filesystem::path dir = file.substr(0, file.rfind("/"));
     std::vector<scene::scene_t<float>> scenes;
     try {
         scenes = scene::get_scenes(argc, argv, dir / "../scenes/scenes_in");

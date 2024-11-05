@@ -36,7 +36,7 @@ namespace user {
             }
         }
 
-        void update_mouse(float& horizontal_angle, float& vertical_angle, const sf::Window& window) {
+        void update(float& horizontal_angle, float& vertical_angle, const sf::Window& window) {
             sf::Vector2i mouse_position = sf::Mouse::getPosition(window);
             if (is_mouse_active_) {
                 if (!is_mouse_setted_in_center_) {
@@ -86,7 +86,7 @@ namespace user {
                 horizontal_angle_(horizontal_angle), vertical_angle_(vertical_angle),
                 z_near_(z_near), z_far_(z_far) {}
         
-        void update_direction_() {
+        void update_direction() {
             direction_ = glm::vec3{
                 cos(vertical_angle_) * sin(horizontal_angle_),
                 sin(vertical_angle_),
@@ -94,12 +94,17 @@ namespace user {
             };
         }
 
-        void update_right_() {
+        void update_right() {
             right_ = glm::vec3{
                 sin(horizontal_angle_ - M_PI / 2.0f),
                 0,
                 cos(horizontal_angle_ - M_PI / 2.0f)
             };
+        }
+
+        void update() {
+            update_direction();
+            update_right();
         }
     };
 
@@ -120,8 +125,7 @@ namespace user {
                v(horizontal_angle, vertical_angle, z_near, z_far), count_scenes_(count_scenes) {}
 
         window_event_e event_callback(const sf::Event& event, const sf::Window& window) {
-            v.update_direction_();
-            v.update_right_();
+            v.update();
 
             switch (event.type) {
                 case sf::Event::Closed:
@@ -172,10 +176,8 @@ namespace user {
                 default:
                     break;
             }
-            m.update_mouse(v.horizontal_angle_, v.vertical_angle_, window);
-
-            v.update_direction_();
-            v.update_right_();
+            m.update(v.horizontal_angle_, v.vertical_angle_, window);
+            v.update();
             return window_event_e::DEFAULT;
         }
 
