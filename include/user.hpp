@@ -31,11 +31,10 @@ namespace user {
               float     speed_rotate_ = 0.f;
         const float   d_speed_rotate_ = 0.001f;
         const float max_speed_rotate_ = 0.005f;
-        int  last_step_ = 0;
         bool is_mouse_active_           = false;
         bool is_mouse_setted_in_center_ = false;
-        sf::Vector2i mouse_position_ {0, 0};
-        sf::Vector2i mouse_direction_{0, 0};
+        sf::Vector2i mouse_position_{0, 0};
+        sf::Vector2i mouse_step_    {0, 0};
         int mouse_borders_ = 20;
 
         glm::vec3 direction_;
@@ -80,15 +79,10 @@ namespace user {
                     horizontal_angle_ -= speed_rotate_ * (mouse_position.x - mouse_position_.x);
                     vertical_angle_   -= speed_rotate_ * (mouse_position.y - mouse_position_.y);
 
-                    last_step_ =   abs(mouse_position.x - mouse_position_.x)
-                                 + abs(mouse_position.y - mouse_position_.y);
+                    mouse_step_.x = mouse_position.x - mouse_position_.x;
+                    mouse_step_.y = mouse_position.y - mouse_position_.y;
 
-                    if (mouse_position.x > mouse_position_.x) mouse_direction_.x =  1;
-                    if (mouse_position.y > mouse_position_.y) mouse_direction_.y =  1;
-                    if (mouse_position.x < mouse_position_.x) mouse_direction_.x = -1;
-                    if (mouse_position.y < mouse_position_.y) mouse_direction_.y = -1;
-
-                    if (last_step_)
+                    if (abs(mouse_step_.x) + abs(mouse_step_.y))
                         speed_rotate_ = std::min(max_speed_rotate_, speed_rotate_ + d_speed_rotate_);
                 }
                 is_mouse_setted_in_center_ = false;
@@ -167,14 +161,12 @@ namespace user {
 
         void update_default() {
             if (!is_mouse_active_) {
-                float normilize_by_last_step = static_cast<float>(last_step_) / static_cast<float>(mouse_borders_);
-                horizontal_angle_ -= normilize_by_last_step * speed_rotate_ * mouse_direction_.x;
-                vertical_angle_   -= normilize_by_last_step * speed_rotate_ * mouse_direction_.y;
+                float normilized_speed_rotate = speed_rotate_ / static_cast<float>(mouse_borders_);
+                horizontal_angle_ -= static_cast<float>(mouse_step_.x) * normilized_speed_rotate;
+                vertical_angle_   -= static_cast<float>(mouse_step_.y) * normilized_speed_rotate;
                 speed_rotate_ = std::max(0.f, speed_rotate_ - d_speed_rotate_);
-                if (real_numbers::is_real_eq(speed_rotate_, 0.f)) {
-                    mouse_direction_ = {0, 0};
-                    last_step_ = 0;
-                }
+                if (real_numbers::is_real_eq(speed_rotate_, 0.f))
+                    mouse_step_ = {0, 0};
             }
         }
 
