@@ -51,6 +51,7 @@
     * <code>A</code> to move left
 3.    <code>Q</code> to activate/deactivate control camera by mouse moving(1 click)
 4.    <code>E</code> to change scene
+4.    <code>Escape</code> to exit
 
 ## How to generate scenes
 

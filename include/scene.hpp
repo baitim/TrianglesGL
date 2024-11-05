@@ -12,6 +12,8 @@
 
 namespace scene {
 
+    int COUNT_VERTEXES_IN_TRIANGLE = 3;
+
     enum class triangle_type_e {
         TRIANGLE_TYPE_NOT_INTERSECT,
         TRIANGLE_TYPE_INTERSECT
@@ -30,7 +32,7 @@ namespace scene {
     struct data2render_t final {
         vertices::vertices_t vertices_;
         light_t light_;
-        data2render_t(int count) : vertices_(count * 3) {}
+        data2render_t(int count) : vertices_(count * COUNT_VERTEXES_IN_TRIANGLE) {}
     };
 
     template <typename T = double>
@@ -56,7 +58,7 @@ namespace scene {
         data2render_t get_data() const {
             data2render_t data{count_};
         
-            for (int i = 0, v_index = 0; i < count_; ++i, v_index += 3) {
+            for (int i = 0, v_index = 0; i < count_; ++i, v_index += COUNT_VERTEXES_IN_TRIANGLE) {
                 char color = 0;
                 if (triangles_types_[i] == triangle_type_e::TRIANGLE_TYPE_INTERSECT)
                     color = 1;

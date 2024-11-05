@@ -29,8 +29,10 @@ namespace user {
         float max_view_angle_ = 60.0f;
         const float aspect_zoom_speed_ = 1.1f;
 
-        bool is_mouse_active = false;
+        bool is_mouse_active_ = false;
+        bool is_mouse_setted_in_center_ = false;
         sf::Vector2i mouse_position_{0, 0};
+        int mouse_borders_ = 10;
 
         glm::vec3 direction_;
         glm::vec3 right_;
@@ -54,6 +56,32 @@ namespace user {
             };
         }
 
+        void set_in_borders(const sf::Vector2i& mouse_position, const sf::Window& window) {
+            sf::Vector2u window_size = window.getSize();
+            sf::Vector2i window_center = {static_cast<int>(window_size.x / 2),
+                                          static_cast<int>(window_size.y / 2)};
+                                        
+            int dx = abs(mouse_position.x - window_center.x);
+            int dy = abs(mouse_position.y - window_center.y);
+            if (dx + dy > mouse_borders_) {
+                sf::Mouse::setPosition(window_center, window);
+                is_mouse_setted_in_center_ = true;
+            }
+        }
+
+        void update_mouse(bool is_mouse_was_active, const sf::Window& window) {
+            sf::Vector2i mouse_position = sf::Mouse::getPosition(window);
+            if (is_mouse_active_) {
+                if (is_mouse_was_active && !is_mouse_setted_in_center_) {
+                    horizontal_angle_ -= speed_rotate_ * (mouse_position.x - mouse_position_.x);
+                    vertical_angle_   -= speed_rotate_ * (mouse_position.y - mouse_position_.y);
+                }
+                is_mouse_setted_in_center_ = false;
+                mouse_position_ = mouse_position;
+                set_in_borders(mouse_position, window);
+            }
+        }
+
     public:
         user_t(const glm::vec3& user_position, const glm::vec3& speed,
                float horizontal_angle, float vertical_angle,
@@ -66,7 +94,7 @@ namespace user {
             update_direction_();
             update_right_();
 
-            bool is_mouse_was_active = is_mouse_active;
+            bool is_mouse_was_active = is_mouse_active_;
             switch (event.type) {
                 case sf::Event::Closed:
                     return window_event_e::EXIT;
@@ -87,6 +115,9 @@ namespace user {
 
                 case sf::Event::KeyPressed:
                     switch (event.key.code) {
+                        case sf::Keyboard::Escape:
+                            return window_event_e::EXIT;
+
                         case sf::Keyboard::A:
                             user_position_ -= right_ * speed_;
                             break;
@@ -100,7 +131,7 @@ namespace user {
                             user_position_ -= direction_ * speed_;
                             break;
                         case sf::Keyboard::Q:
-                            is_mouse_active = !is_mouse_active;
+                            is_mouse_active_ = !is_mouse_active_;
                             break;
                         case sf::Keyboard::E:
                             number_scene_ = (number_scene_ + 1) % count_scenes_;
@@ -113,14 +144,7 @@ namespace user {
                 default:
                     break;
             }
-            if (is_mouse_active) {
-                sf::Vector2i mouse_position = sf::Mouse::getPosition(window);
-                if (is_mouse_was_active) {
-                    horizontal_angle_ -= speed_rotate_ * (mouse_position.x - mouse_position_.x);
-                    vertical_angle_   -= speed_rotate_ * (mouse_position.y - mouse_position_.y);
-                }
-                mouse_position_ = mouse_position;
-            }
+            update_mouse(is_mouse_was_active, window);
 
             update_direction_();
             update_right_();
