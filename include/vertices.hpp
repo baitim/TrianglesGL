@@ -5,12 +5,6 @@
 
 namespace vertices {
 
-    template <typename T = double>
-    struct vertex_coords_t final {
-        T x_, y_, z_;
-        vertex_coords_t(T x, T y, T z) : x_(x), y_(y), z_(z) {}
-    };
-
     struct vertex2render_t {
         GLfloat coord [3];
         GLfloat normal[3];
@@ -29,8 +23,8 @@ namespace vertices {
 
         template <typename T>
         void set_vertex(int ind, char color, char is_dark,
-                        const vertex_coords_t<T>& coords,
-                        const vertex_coords_t<T>& normal) {
+                        const point::point_t<T>& coords,
+                        const point::point_t<T>& normal) {
             vertex2render_t& vertex = vertices_[ind];
             vertex.coord[0] = coords.x_;
             vertex.coord[1] = coords.y_;

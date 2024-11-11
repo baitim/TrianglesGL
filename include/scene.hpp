@@ -59,22 +59,19 @@ namespace scene {
             data2render_t data{count_};
         
             for (int i = 0, v_index = 0; i < count_; ++i, v_index += COUNT_VERTEXES_IN_TRIANGLE) {
+                auto& triangle = triangles_[i];
+
                 char color = 0;
                 if (triangles_types_[i] == triangle_type_e::TRIANGLE_TYPE_INTERSECT)
                     color = 1;
 
-                char is_dark = check_is_dark_side(data.light_.light_direction_, triangles_[i]);
+                char is_dark = check_is_dark_side(data.light_.light_direction_, triangle);
 
-                vertices::vertex_coords_t<T> a_coords{triangles_[i].a_.x_, triangles_[i].a_.y_, triangles_[i].a_.z_};
-                vertices::vertex_coords_t<T> b_coords{triangles_[i].b_.x_, triangles_[i].b_.y_, triangles_[i].b_.z_};
-                vertices::vertex_coords_t<T> c_coords{triangles_[i].c_.x_, triangles_[i].c_.y_, triangles_[i].c_.z_};
+                point::point_t normal = triangle.normal().norm();
 
-                point::point_t normal_ = triangles_[i].normal().norm();
-                vertices::vertex_coords_t<T> normal{normal_.x_, normal_.y_, normal_.z_};
-
-                data.vertices_.set_vertex(v_index + 0, color, is_dark, a_coords, normal);
-                data.vertices_.set_vertex(v_index + 1, color, is_dark, b_coords, normal);
-                data.vertices_.set_vertex(v_index + 2, color, is_dark, c_coords, normal);
+                data.vertices_.set_vertex(v_index + 0, color, is_dark, triangle.a_, normal);
+                data.vertices_.set_vertex(v_index + 1, color, is_dark, triangle.b_, normal);
+                data.vertices_.set_vertex(v_index + 2, color, is_dark, triangle.c_, normal);
             }
 
             return data;
