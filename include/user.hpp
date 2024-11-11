@@ -13,7 +13,7 @@ namespace user {
         NEW_SCENE
     };
 
-    struct mouse_t final {
+    class mouse_t final {
               float     speed_rotate_ = 0.f;
         const float   d_speed_rotate_ = 0.001f;
         const float max_speed_rotate_ = 0.005f;
@@ -23,6 +23,7 @@ namespace user {
         sf::Vector2i mouse_step_    {0, 0};
         int mouse_borders_ = 20;
 
+    private:
         void set_in_borders(const sf::Vector2i& mouse_position, const sf::Window& window) {
             sf::Vector2u window_size = window.getSize();
             sf::Vector2i window_center = {static_cast<int>(window_size.x / 2),
@@ -36,6 +37,7 @@ namespace user {
             }
         }
 
+    public:
         void update(float& horizontal_angle, float& vertical_angle, const sf::Window& window) {
             sf::Vector2i mouse_position = sf::Mouse::getPosition(window);
             if (is_mouse_active_) {
@@ -65,6 +67,9 @@ namespace user {
                     mouse_step_ = {0, 0};
             }
         }
+
+        bool is_active    () const { return is_mouse_active_; }
+        void change_active() { is_mouse_active_ = !is_mouse_active_; }
     };
 
     struct viewer_t final {
@@ -82,8 +87,10 @@ namespace user {
         glm::vec3 direction_;
         glm::vec3 right_;
 
-        viewer_t(float horizontal_angle, float vertical_angle, float z_near, float z_far) :
-                horizontal_angle_(horizontal_angle), vertical_angle_(vertical_angle),
+        viewer_t(float horizontal_angle, float vertical_angle,
+                 float z_near, float z_far) :
+                horizontal_angle_(horizontal_angle),
+                vertical_angle_(vertical_angle),
                 z_near_(z_near), z_far_(z_far) {}
         
         void update_direction() {
@@ -106,6 +113,13 @@ namespace user {
             update_direction();
             update_right();
         }
+
+        void update_on_scroll(const sf::Event& event) {
+            if (real_numbers::is_real_gt(event.mouseWheelScroll.delta, 0.0f))
+                view_angle_ = std::min(max_view_angle_, view_angle_ * aspect_zoom_speed_);
+            else
+                view_angle_ = std::max(min_view_angle_, view_angle_ / aspect_zoom_speed_);
+        }
     };
 
     class user_t final {
@@ -117,16 +131,49 @@ namespace user {
         int number_scene_ = 0;
         int count_scenes_ = 0;
 
+    private:
+        window_event_e update_on_key(int key_code, sf::Window& window) {
+            switch (key_code) {
+                case sf::Keyboard::Escape:
+                    return window_event_e::EXIT;
+
+                case sf::Keyboard::A:
+                    user_position_ -= v.right_ * speed_;
+                    break;
+                case sf::Keyboard::D:
+                    user_position_ += v.right_ * speed_;
+                    break;
+                case sf::Keyboard::W:
+                    user_position_ += v.direction_ * speed_;
+                    break;
+                case sf::Keyboard::S:
+                    user_position_ -= v.direction_ * speed_;
+                    break;
+                case sf::Keyboard::Q:
+                    m.change_active();
+                    window.setMouseCursorVisible(!m.is_active());
+                    break;
+                case sf::Keyboard::E:
+                    number_scene_ = (number_scene_ + 1) % count_scenes_;
+                    return window_event_e::NEW_SCENE;
+                default:
+                    break;
+            }
+            return window_event_e::DEFAULT;
+        }
+
     public:
         user_t(const glm::vec3& user_position, const glm::vec3& speed,
                float horizontal_angle, float vertical_angle,
                float z_near, float z_far, int count_scenes) :
                user_position_(user_position), speed_(speed),
-               v(horizontal_angle, vertical_angle, z_near, z_far), count_scenes_(count_scenes) {}
+               v(horizontal_angle, vertical_angle, z_near, z_far),
+               count_scenes_(count_scenes) {}
 
         window_event_e event_callback(const sf::Event& event, sf::Window& window) {
             v.update();
 
+            window_event_e result;
             switch (event.type) {
                 case sf::Event::Closed:
                     return window_event_e::EXIT;
@@ -135,43 +182,13 @@ namespace user {
                     return window_event_e::RESIZED;
 
                 case sf::Event::MouseWheelScrolled:
-                    switch (real_numbers::is_real_gt(event.mouseWheelScroll.delta, 0.0f)) {
-                        case true:
-                            v.view_angle_ = std::min(v.max_view_angle_, v.view_angle_ * v.aspect_zoom_speed_);
-                            break;
-                        case false:
-                            v.view_angle_ = std::max(v.min_view_angle_, v.view_angle_ / v.aspect_zoom_speed_);
-                            break;
-                    }
+                    v.update_on_scroll(event);
                     break;
 
                 case sf::Event::KeyPressed:
-                    switch (event.key.code) {
-                        case sf::Keyboard::Escape:
-                            return window_event_e::EXIT;
-
-                        case sf::Keyboard::A:
-                            user_position_ -= v.right_ * speed_;
-                            break;
-                        case sf::Keyboard::D:
-                            user_position_ += v.right_ * speed_;
-                            break;
-                        case sf::Keyboard::W:
-                            user_position_ += v.direction_ * speed_;
-                            break;
-                        case sf::Keyboard::S:
-                            user_position_ -= v.direction_ * speed_;
-                            break;
-                        case sf::Keyboard::Q:
-                            m.is_mouse_active_ = !m.is_mouse_active_;
-                            window.setMouseCursorVisible(!m.is_mouse_active_);
-                            break;
-                        case sf::Keyboard::E:
-                            number_scene_ = (number_scene_ + 1) % count_scenes_;
-                            return window_event_e::NEW_SCENE;
-                        default:
-                            break;
-                    }
+                    result = update_on_key(event.key.code, window);
+                    if (result != window_event_e::DEFAULT)
+                        return result;
                     break;
 
                 default:
@@ -187,20 +204,26 @@ namespace user {
         }
 
         void set_aspect(int width, int height) {
-            v.aspect_ = static_cast<float>(width) / static_cast<float>(height);
+            v.aspect_ =   static_cast<float>(width)
+                        / static_cast<float>(height);
         }
 
         inline glm::highp_mat4 get_lookat() const {
             glm::vec3 lookup = glm::cross(v.right_, v.direction_);
-            return glm::lookAt(user_position_, user_position_ + v.direction_, lookup);
+            return glm::lookAt(
+                user_position_,
+                user_position_ + v.direction_,
+                lookup
+            );
         }
 
         inline glm::highp_mat4 get_perspective() const {
-            return glm::perspective(glm::radians(v.view_angle_), v.aspect_, v.z_near_, v.z_far_);
-        }
-
-        glm::vec3 get_user_direction() const {
-            return v.direction_;
+            return glm::perspective(
+                glm::radians(v.view_angle_),
+                v.aspect_,
+                v.z_near_,
+                v.z_far_
+            );
         }
 
         int get_number_scene() const {

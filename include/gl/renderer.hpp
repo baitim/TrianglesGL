@@ -200,12 +200,6 @@ namespace renderer {
                         light_dir.x, light_dir.y, light_dir.z);
         }
 
-        void set_uniform_user_direction(const glm::vec3& user_direction) const {
-            glm::vec3 user_dir = glm::normalize(user_direction);
-            glUniform3f(glGetUniformLocation(program_id_, "user_dir"),
-                        user_dir.x, user_dir.y, user_dir.z);
-        }
-
         void start_program(const scene::data2render_t& data2render, 
                            int w_width, int w_height) {
             count_vertices_ = data2render.vertices_.count_;
@@ -233,14 +227,12 @@ namespace renderer {
             start_program(data2render, w_width, w_height);
         }
 
-        void render(const glm::vec3&       user_direction,
-                    const glm::highp_mat4& user_perspective,
+        void render(const glm::highp_mat4& user_perspective,
                     const glm::highp_mat4& user_lookat) const {
 
             set_uniform_time();
             set_uniform_MVP(user_perspective, user_lookat);
             set_uniform_depth_bias_MVP(user_perspective, user_lookat);
-            set_uniform_user_direction(user_direction);
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glDrawArrays(GL_TRIANGLES, 0, count_vertices_);

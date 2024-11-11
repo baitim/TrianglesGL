@@ -5,7 +5,6 @@ layout(location = 1) in vec3 normal;
 layout(location = 2) in int  color;
 layout(location = 3) in int  is_dark;
 
-uniform vec3 user_dir;
 uniform vec3 light_dir;
 uniform vec3 colors[2]; 
 uniform mat4 MVP;
