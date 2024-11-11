@@ -129,24 +129,26 @@ namespace renderer {
         }
 
         void bind_vertices(const vertices::vertices_t& vertices) const {
+            size_t vertex_size = sizeof(vertices::vertex2render_t);
+
             GLuint VAO, VBO;
             glGenVertexArrays(1, &VAO);
             glGenBuffers(1, &VBO);
             glBindVertexArray(VAO);
             glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferData(GL_ARRAY_BUFFER, vertices.count_ * sizeof(*vertices.vertices_.get()),
-                         vertices.vertices_.get(), GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, vertices.count_ * vertex_size,
+                         vertices.vertices_.data(), GL_STATIC_DRAW);
             
             glEnableVertexAttribArray(0);
             glEnableVertexAttribArray(1);
             glEnableVertexAttribArray(2);
             glEnableVertexAttribArray(3);
 
-            size_t vertex_size = sizeof(*vertices.vertices_.get());
-            void* coord_offset   = std::bit_cast<void*>(offsetof(vertices::vertex2render_t, coord));
-            void* normal_offset  = std::bit_cast<void*>(offsetof(vertices::vertex2render_t, normal));
-            void* color_offset   = std::bit_cast<void*>(offsetof(vertices::vertex2render_t, color));
-            void* is_dark_offset = std::bit_cast<void*>(offsetof(vertices::vertex2render_t, is_dark));
+            using data = vertices::vertex2render_t;
+            void* coord_offset   = std::bit_cast<void*>(offsetof(data, coord));
+            void* normal_offset  = std::bit_cast<void*>(offsetof(data, normal));
+            void* color_offset   = std::bit_cast<void*>(offsetof(data, color));
+            void* is_dark_offset = std::bit_cast<void*>(offsetof(data, is_dark));
             glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, vertex_size, coord_offset);
             glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE, vertex_size, normal_offset);
             glVertexAttribIPointer(2, 1, GL_BYTE,            vertex_size, color_offset);

@@ -57,6 +57,7 @@ namespace scene {
 
         data2render_t get_data() const {
             data2render_t data{count_};
+            auto& vertices = data.vertices_;
         
             for (int i = 0, v_index = 0; i < count_; ++i, v_index += COUNT_VERTEXES_IN_TRIANGLE) {
                 auto& triangle = triangles_[i];
@@ -69,9 +70,9 @@ namespace scene {
 
                 point::point_t normal = triangle.normal().norm();
 
-                data.vertices_.set_vertex(v_index + 0, color, is_dark, triangle.a_, normal);
-                data.vertices_.set_vertex(v_index + 1, color, is_dark, triangle.b_, normal);
-                data.vertices_.set_vertex(v_index + 2, color, is_dark, triangle.c_, normal);
+                vertices.set_vertex(v_index + 0, color, is_dark, triangle.a_, normal);
+                vertices.set_vertex(v_index + 1, color, is_dark, triangle.b_, normal);
+                vertices.set_vertex(v_index + 2, color, is_dark, triangle.c_, normal);
             }
 
             return data;
