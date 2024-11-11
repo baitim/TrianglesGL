@@ -20,13 +20,13 @@ namespace scene {
     };
 
     struct light_t final {
-        int width_  = 2048;
-        int height_ = 2048;
-        glm::mat4 depth_MVP_;
-        glm::vec3 light_direction_{-1, -1, -1};
-        glm::vec3 light_position_ { 2,  2,  2};
-        glm::vec3 light_up_       { 0,  1,  0};
-        glm::mat4 depth_projection_matrix_ = glm::ortho<float>(-1.4, 1.4, -1.4, 1.4, 0.1, 5);
+        int width  = 2048;
+        int height = 2048;
+        glm::mat4 depth_MVP;
+        glm::vec3 light_direction{-1, -1, -1};
+        glm::vec3 light_position { 2,  2,  2};
+        glm::vec3 light_up       { 0,  1,  0};
+        glm::mat4 depth_projection_matrix = glm::ortho<float>(-1.4, 1.4, -1.4, 1.4, 0.1, 5);
     };
 
     struct data2render_t final {
@@ -66,7 +66,7 @@ namespace scene {
                 if (triangles_types_[i] == triangle_type_e::TRIANGLE_TYPE_INTERSECT)
                     color = 1;
 
-                char is_dark = check_is_dark_side(data.light_.light_direction_, triangle);
+                char is_dark = check_is_dark_side(data.light_.light_direction, triangle);
 
                 point::point_t normal = triangle.normal().norm();
 

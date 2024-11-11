@@ -41,23 +41,23 @@ namespace renderer {
         }
 
         void set_uniform_depth_MVP(const scene::light_t& l, GLuint program_id) {
-            glm::mat4 depth_view_matrix = glm::lookAt(l.light_position_, l.light_direction_, l.light_up_);
+            glm::mat4 depth_view_matrix = glm::lookAt(l.light_position, l.light_direction, l.light_up);
             glm::mat4 depth_model_matrix = glm::mat4(1.0);
-            depth_MVP_ = l.depth_projection_matrix_ * depth_view_matrix * depth_model_matrix;
+            depth_MVP_ = l.depth_projection_matrix * depth_view_matrix * depth_model_matrix;
             glUniformMatrix4fv(glGetUniformLocation(program_id, "depth_MVP"),
                                1, GL_FALSE, &depth_MVP_[0][0]);
         }
 
     public:
         void init(const scene::light_t& light, GLuint program_id, int count_vertices) {
-            light_direction_ = light.light_direction_;
+            light_direction_ = light.light_direction;
 
-            init_texture(light.width_, light.height_);
+            init_texture(light.width, light.height);
             GLuint shadows_frame_buffer;
             set_buffer(shadows_frame_buffer);
             set_uniform_depth_MVP(light, program_id);
 
-            glViewport(0, 0, light.width_, light.height_);
+            glViewport(0, 0, light.width, light.height);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glDrawArrays(GL_TRIANGLES, 0, count_vertices);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
