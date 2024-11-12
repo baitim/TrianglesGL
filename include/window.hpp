@@ -58,9 +58,5 @@ namespace window {
                 window_.display();
             }
         }
-
-        ~window_t() {
-            window_.close();
-        }
     };
 }

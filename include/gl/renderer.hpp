@@ -128,23 +128,23 @@ namespace renderer {
             delete_attached_shaders();
         }
 
-        void bind_vertices(const vertices::vertices_t& vertices) const {
-            size_t vertex_size = sizeof(vertices::vertex2render_t);
+        void bind_vertices(const std::vector<scene::vertex2render_t>& vertices) const {
+            size_t vertex_size = sizeof(scene::vertex2render_t);
 
             GLuint VAO, VBO;
             glGenVertexArrays(1, &VAO);
             glGenBuffers(1, &VBO);
             glBindVertexArray(VAO);
             glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferData(GL_ARRAY_BUFFER, vertices.count_ * vertex_size,
-                         vertices.vertices_.data(), GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, vertices.size() * vertex_size,
+                         vertices.data(), GL_STATIC_DRAW);
             
             glEnableVertexAttribArray(0);
             glEnableVertexAttribArray(1);
             glEnableVertexAttribArray(2);
             glEnableVertexAttribArray(3);
 
-            using data = vertices::vertex2render_t;
+            using data = scene::vertex2render_t;
             void* coord_offset   = std::bit_cast<void*>(offsetof(data, coord));
             void* normal_offset  = std::bit_cast<void*>(offsetof(data, normal));
             void* color_offset   = std::bit_cast<void*>(offsetof(data, color));
@@ -202,7 +202,7 @@ namespace renderer {
 
         void start_program(const scene::data2render_t& data2render, 
                            int w_width, int w_height) {
-            count_vertices_ = data2render.vertices_.count_;
+            count_vertices_ = data2render.vertices_.size();
             bind_vertices(data2render.vertices_);
 
             load_shaders(shaders_.shadows_);

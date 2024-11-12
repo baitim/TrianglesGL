@@ -1,7 +1,6 @@
 #pragma once
 
 #include "octree.hpp"
-#include "vertices.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
@@ -9,10 +8,9 @@
 #include <filesystem>
 #include <fstream>
 #include <exception>
+#include <vector>
 
 namespace scene {
-
-    int COUNT_VERTEXES_IN_TRIANGLE = 3;
 
     enum class triangle_type_e {
         TRIANGLE_TYPE_NOT_INTERSECT,
@@ -29,10 +27,32 @@ namespace scene {
         glm::mat4 depth_projection_matrix = glm::ortho<float>(-1.4, 1.4, -1.4, 1.4, 0.1, 5);
     };
 
+    int COUNT_VERTEXES_IN_TRIANGLE = 3;
+
+    struct vertex2render_t {
+        point::point_t<GLfloat> coord;
+        point::point_t<GLfloat> normal;
+        GLbyte color;
+        GLbyte is_dark;
+    };
+
     struct data2render_t final {
-        vertices::vertices_t vertices_;
         light_t light_;
+        std::vector<vertex2render_t> vertices_;
+
+    public:
         data2render_t(int count) : vertices_(count * COUNT_VERTEXES_IN_TRIANGLE) {}
+
+        template <typename T>
+        void set_vertex(int ind, char color, char is_dark,
+                        const point::point_t<T>& coord,
+                        const point::point_t<T>& normal) {
+            vertex2render_t& vertex = vertices_[ind];
+            vertex.coord   = coord;
+            vertex.normal  = normal;
+            vertex.color   = color;
+            vertex.is_dark = is_dark;
+        }
     };
 
     template <typename T = double>
@@ -57,7 +77,6 @@ namespace scene {
 
         data2render_t get_data() const {
             data2render_t data{count_};
-            auto& vertices = data.vertices_;
         
             for (int i = 0, v_index = 0; i < count_; ++i, v_index += COUNT_VERTEXES_IN_TRIANGLE) {
                 auto& triangle = triangles_[i];
@@ -70,9 +89,9 @@ namespace scene {
 
                 point::point_t normal = triangle.normal().norm();
 
-                vertices.set_vertex(v_index + 0, color, is_dark, triangle.a_, normal);
-                vertices.set_vertex(v_index + 1, color, is_dark, triangle.b_, normal);
-                vertices.set_vertex(v_index + 2, color, is_dark, triangle.c_, normal);
+                data.set_vertex(v_index + 0, color, is_dark, triangle.a_, normal);
+                data.set_vertex(v_index + 1, color, is_dark, triangle.b_, normal);
+                data.set_vertex(v_index + 2, color, is_dark, triangle.c_, normal);
             }
 
             return data;
