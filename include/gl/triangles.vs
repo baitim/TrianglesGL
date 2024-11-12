@@ -3,12 +3,12 @@
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;
 layout(location = 2) in int  color;
-layout(location = 3) in int  is_dark;
 
 uniform vec3 light_dir;
 uniform vec3 colors[2]; 
 uniform mat4 MVP;
 uniform mat4 depth_bias_MVP;
+uniform int  is_cw;
 
 out vec3  v_color;
 out vec4  shadow_coord_;
@@ -21,5 +21,5 @@ void main() {
     shadow_coord_ = depth_bias_MVP * vec4(position, 1.0);
 
     light_angle = dot(light_dir, normal);
-    is_dark_side = is_dark;
+    is_dark_side = is_cw;
 }

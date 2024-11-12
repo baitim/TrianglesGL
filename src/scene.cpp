@@ -10,14 +10,16 @@ int main(int argc, char* argv[]) {
 
     int w_width  = 800;
     int w_height = 600;
-    window::window_t window(sf::VideoMode(w_width, w_height), "Triangles", sf::ContextSettings(24, 8, 0, 3, 3));    
+    window::window_t window(sf::VideoMode(w_width, w_height),
+                            "Triangles",
+                            sf::ContextSettings(24, 8, 0, 3, 3));    
 
     std::string file{__FILE__};
     std::filesystem::path dir = file.substr(0, file.rfind("/"));
     std::vector<scene::scene_t<float>> scenes;
     try {
         scenes = scene::get_scenes(argc, argv, dir / "../scenes/scenes_in");
-    } catch (scene::error_t& error) {
+    } catch (const scene::error_t& error) {
         std::cout << print_red(error.what()) << "\n";
         return 1;
     }

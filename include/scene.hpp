@@ -42,7 +42,6 @@ namespace scene {
         point::point_t<GLfloat> coord;
         point::point_t<GLfloat> normal;
         GLbyte color;
-        GLbyte is_dark;
     };
 
     struct data2render_t final {
@@ -53,14 +52,13 @@ namespace scene {
         data2render_t(int count) : vertices_(count * COUNT_VERTEXES_IN_TRIANGLE) {}
 
         template <typename T>
-        void set_vertex(int ind, char color, char is_dark,
+        void set_vertex(int ind, char color,
                         const point::point_t<T>& coord,
                         const point::point_t<T>& normal) {
             vertex2render_t& vertex = vertices_[ind];
             vertex.coord   = coord;
             vertex.normal  = normal;
             vertex.color   = color;
-            vertex.is_dark = is_dark;
         }
     };
 
@@ -70,18 +68,24 @@ namespace scene {
         std::vector<triangle::triangle_t<T>> triangles_;
         std::vector<triangle_type_e> triangles_types_;
 
-        char check_is_dark_side(const glm::vec3& light_dir, const triangle::triangle_t<T>& t) const {
+        void set_ccw2light(const glm::vec3& light_dir, triangle::triangle_t<T>& t) const {
             point::point_t<T> normal_by_cross = point::cross_product(t.b_ - t.a_, t.c_ - t.a_);
             point::point_t<T> light_direction = {light_dir[0], light_dir[1], light_dir[2]};
-            return point::dot(light_direction, normal_by_cross) < 0;
+            if (real_numbers::is_real_gt(point::dot(light_direction, normal_by_cross),
+                                         static_cast<float>(0)))
+                std::swap(t.b_, t.c_);
         }
 
     public:
-        void set_types() {
+        void preset() {
             octree::octree_t<T> octree(count_, triangles_.begin(), triangles_.end());
             std::set<int> ans = octree.get_set_intersecting_triangles();
             for (auto it : ans)
                 triangles_types_[it] = triangle_type_e::TRIANGLE_TYPE_INTERSECT;
+
+            glm::vec3 light_dir = light_t{}.light_direction;
+            for (int i = 0; i < count_; ++i)
+                set_ccw2light(light_dir, triangles_[i]);
         }
 
         data2render_t get_data() const {
@@ -94,13 +98,11 @@ namespace scene {
                 if (triangles_types_[i] == triangle_type_e::TRIANGLE_TYPE_INTERSECT)
                     color = 1;
 
-                char is_dark = check_is_dark_side(data.light_.light_direction, triangle);
-
                 point::point_t normal = triangle.normal().norm();
 
-                data.set_vertex(v_index + 0, color, is_dark, triangle.a_, normal);
-                data.set_vertex(v_index + 1, color, is_dark, triangle.b_, normal);
-                data.set_vertex(v_index + 2, color, is_dark, triangle.c_, normal);
+                data.set_vertex(v_index + 0, color, triangle.a_, normal);
+                data.set_vertex(v_index + 1, color, triangle.b_, normal);
+                data.set_vertex(v_index + 2, color, triangle.c_, normal);
             }
 
             return data;
@@ -124,20 +126,7 @@ namespace scene {
             if (!is.good())
                 throw error_t{"triangle was entered incorrectly"};
         }
-        sc.set_types();
-
-        count *= 2;
-        sc.count_ = count;
-        sc.triangles_.resize(count);
-        sc.triangles_types_.resize(count, triangle_type_e::TRIANGLE_TYPE_NOT_INTERSECT);
-
-        int count_half = count / 2;
-        for (int i = 0; i < count_half; ++i) {
-            int shift_i = count_half + i;
-            sc.triangles_      [shift_i] = sc.triangles_      [i];
-            sc.triangles_types_[shift_i] = sc.triangles_types_[i];
-            std::swap(sc.triangles_[shift_i].b_, sc.triangles_[shift_i].c_);
-        }
+        sc.preset();
 
         return is;
     }

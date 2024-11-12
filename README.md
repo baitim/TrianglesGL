@@ -7,39 +7,39 @@
 ## How to run
 
 1. Clone <br>
-    write <code>git clone https://github.com/baitim/TrianglesGL.git</code> in terminal
+    <code>git clone https://github.com/baitim/TrianglesGL.git</code>
 
 2. Go to folder <br>
-    write <code>cd TrianglesGL</code> in terminal
+    <code>cd TrianglesGL</code>
 
 3. Prepare conan <br>
-    write <code>conan profile detect --force</code> in terminal
+    <code>conan profile detect --force</code>
 
 4. Init dependencies <br>
-    write <code>conan install . --build=missing -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=True -s compiler.cppstd=gnu20</code> in terminal <br>
+    <code>conan install . --build=missing -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=True -s compiler.cppstd=gnu20</code> <br>
     maybe you will need these flags for the conan <code>-s build_type=Debug</code>
     
 5. Init submodules <br>
-    write <code>git submodule update --init --recursive</code> in terminal
+    <code>git submodule update --init --recursive</code>
 
 6. Build <br>
-    write <code>cmake . -B build -DCMAKE_TOOLCHAIN_FILE=build/Release/generators/conan_toolchain.cmake; cmake --build build</code> in terminal
+    <code>cmake . -B build -DCMAKE_TOOLCHAIN_FILE=build/Release/generators/conan_toolchain.cmake; cmake --build build</code>
 
 7. Run <br>
-    write <code>./build/src/scene</code> in terminal <br>
+    <code>./build/src/scene</code> <br>
 
 ## How to test
 
 1. Prepare
     - Go to folder <br>
-        write <code>cd Triangles3D/tests/end_to_end</code> in terminal
+        <code>cd Triangles3D/tests/end_to_end</code>
 
     - Generate tests <br>
-        write <code>python3 generate.py</code> in terminal
+        <code>python3 generate.py</code>
 
 2. Testing
     - End to end & Unit<br>
-        in root dir write <code>ctest --test-dir build/Triangles3D</code> in terminal <br>
+        in root dir <code>ctest --test-dir build/Triangles3D</code> <br>
         maybe you will need these flags for the ctest <code>--rerun-failed --output-on-failure</code>
 
 ## How to use
@@ -56,10 +56,10 @@
 ## How to generate scenes
 
 1. - Go to folder <br>
-        write <code>cd scenes</code> in terminal
+        <code>cd scenes</code>
 
 2. - Generate scenes <br>
-        write <code>python3 generate.py</code> in terminal
+        <code>python3 generate.py</code>
 
 ## Features
 

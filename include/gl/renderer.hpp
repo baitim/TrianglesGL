@@ -85,7 +85,7 @@ namespace renderer {
 
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_CULL_FACE);
-            glCullFace(GL_FRONT);
+            glCullFace(GL_BACK);
             glDepthFunc(GL_LESS);
             glDepthMask(GL_TRUE);
 
@@ -142,17 +142,14 @@ namespace renderer {
             glEnableVertexAttribArray(0);
             glEnableVertexAttribArray(1);
             glEnableVertexAttribArray(2);
-            glEnableVertexAttribArray(3);
 
             using data = scene::vertex2render_t;
             void* coord_offset   = std::bit_cast<void*>(offsetof(data, coord));
             void* normal_offset  = std::bit_cast<void*>(offsetof(data, normal));
             void* color_offset   = std::bit_cast<void*>(offsetof(data, color));
-            void* is_dark_offset = std::bit_cast<void*>(offsetof(data, is_dark));
             glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, vertex_size, coord_offset);
             glVertexAttribPointer (1, 3, GL_FLOAT, GL_FALSE, vertex_size, normal_offset);
             glVertexAttribIPointer(2, 1, GL_BYTE,            vertex_size, color_offset);
-            glVertexAttribIPointer(3, 1, GL_BYTE,            vertex_size, is_dark_offset);
         }
 
         void set_uniform_time() const {
@@ -200,6 +197,10 @@ namespace renderer {
                         light_dir.x, light_dir.y, light_dir.z);
         }
 
+        void set_uniform_is_cw(bool is_cw) const {
+            glUniform1i(glGetUniformLocation(program_id_, "is_cw"), is_cw);
+        }
+
         void start_program(const scene::data2render_t& data2render, 
                            int w_width, int w_height) {
             count_vertices_ = data2render.vertices_.size();
@@ -220,6 +221,18 @@ namespace renderer {
             set_uniform_light_direction();
         }
 
+        void render_cw() const {
+            glFrontFace(GL_CW);
+            set_uniform_is_cw(true);
+            glDrawArrays(GL_TRIANGLES, 0, count_vertices_);
+        }
+
+        void render_ccw() const {
+            glFrontFace(GL_CCW);
+            set_uniform_is_cw(false);
+            glDrawArrays(GL_TRIANGLES, 0, count_vertices_);
+        }
+
     public:
         renderer_t(const shaders_t& shaders, const scene::data2render_t& data2render,
                    int w_width, int w_height) : shaders_(shaders) {
@@ -235,7 +248,8 @@ namespace renderer {
             set_uniform_depth_bias_MVP(user_perspective, user_lookat);
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glDrawArrays(GL_TRIANGLES, 0, count_vertices_);
+            render_cw ();
+            render_ccw();
         }
 
         void rebind_scene(const scene::data2render_t& data2render, int w_width, int w_height) {
