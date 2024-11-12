@@ -67,8 +67,8 @@ namespace user {
             }
         }
 
-        bool is_active    () const { return is_mouse_active_; }
-        void change_active() { is_mouse_active_ = !is_mouse_active_; }
+        bool is_active    () const noexcept { return is_mouse_active_; }
+        void change_active() noexcept { is_mouse_active_ = !is_mouse_active_; }
     };
 
     struct viewer_t final {
@@ -225,7 +225,7 @@ namespace user {
             );
         }
 
-        int get_number_scene() const {
+        int get_number_scene() const noexcept {
             return number_scene_;
         }
     };

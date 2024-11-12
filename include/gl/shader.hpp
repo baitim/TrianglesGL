@@ -56,6 +56,6 @@ namespace shader {
             install();
         }
 
-        GLuint get_id() const { return shader_id_; }
+        GLuint get_id() const noexcept { return shader_id_; }
     };
 }

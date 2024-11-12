@@ -63,9 +63,9 @@ namespace renderer {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
-        GLuint    get_id()        const { return id_; }
-        glm::vec3 get_light_dir() const { return light_direction_; }
-        glm::mat4 get_depth_MVP() const { return depth_MVP_; }
+        GLuint    get_id()        const noexcept { return id_; }
+        glm::vec3 get_light_dir() const noexcept { return light_direction_; }
+        glm::mat4 get_depth_MVP() const noexcept { return depth_MVP_; }
     };
 
     class renderer_t final {

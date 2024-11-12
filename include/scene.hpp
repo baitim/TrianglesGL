@@ -54,7 +54,7 @@ namespace scene {
         template <typename T>
         void set_vertex(int ind, char color,
                         const point::point_t<T>& coord,
-                        const point::point_t<T>& normal) {
+                        const point::point_t<T>& normal) noexcept {
             vertex2render_t& vertex = vertices_[ind];
             vertex.coord   = coord;
             vertex.normal  = normal;
