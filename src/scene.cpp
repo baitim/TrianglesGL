@@ -17,8 +17,8 @@ int main(int argc, char* argv[]) {
     std::vector<scene::scene_t<float>> scenes;
     try {
         scenes = scene::get_scenes(argc, argv, dir / "../scenes/scenes_in");
-    } catch (const char* error_message) {
-        std::cout << print_red(error_message) << "\n";
+    } catch (scene::error_t& error) {
+        std::cout << print_red(error.what()) << "\n";
         return 1;
     }
 

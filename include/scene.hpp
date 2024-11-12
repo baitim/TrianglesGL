@@ -12,6 +12,15 @@
 
 namespace scene {
 
+    class error_t final : std::exception {
+        std::string msg_;
+    
+    public:
+        error_t(const char*        msg) : msg_(msg) {}
+        error_t(const std::string& msg) : msg_(msg) {}
+        const char* what() const noexcept { return msg_.c_str(); }
+    };
+
     enum class triangle_type_e {
         TRIANGLE_TYPE_NOT_INTERSECT,
         TRIANGLE_TYPE_INTERSECT
@@ -29,7 +38,7 @@ namespace scene {
 
     int COUNT_VERTEXES_IN_TRIANGLE = 3;
 
-    struct vertex2render_t {
+    struct vertex2render_t final {
         point::point_t<GLfloat> coord;
         point::point_t<GLfloat> normal;
         GLbyte color;
@@ -103,15 +112,18 @@ namespace scene {
         int count;
         is >> count;
         if (!is.good())
-            throw "invalid count of scenes";
+            throw error_t{"invalid count of scenes"};
         if (count <= 0)
-            throw "le count of scenes";
+            throw error_t{"count of scenes <= 0"};
 
         sc.count_ = count;
         sc.triangles_.resize(count);
         sc.triangles_types_.resize(count, triangle_type_e::TRIANGLE_TYPE_NOT_INTERSECT);
-        for (int i = 0; i < count; ++i)
+        for (int i = 0; i < count; ++i) {
             is >> sc.triangles_[i];
+            if (!is.good())
+                throw error_t{"triangle was entered incorrectly"};
+        }
         sc.set_types();
 
         count *= 2;
