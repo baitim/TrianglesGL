@@ -76,7 +76,6 @@ namespace scene {
                 std::swap(t.b_, t.c_);
         }
 
-    public:
         void preset() {
             octree::octree_t<T> octree(count_, triangles_.begin(), triangles_.end());
             std::set<int> ans = octree.get_set_intersecting_triangles();
@@ -88,6 +87,7 @@ namespace scene {
                 set_ccw2light(light_dir, triangles_[i]);
         }
 
+    public:
         data2render_t get_data() const {
             data2render_t data{count_};
         
