@@ -33,7 +33,7 @@ namespace scene {
         glm::mat4 depth_projection_matrix = glm::ortho<float>(-1.4, 1.4, -1.4, 1.4, 0.1, 5);
     };
 
-    int COUNT_VERTEXES_IN_TRIANGLE = 3;
+    inline const int COUNT_VERTEXES_IN_TRIANGLE = 3;
 
     struct vertex2render_t final {
         point::point_t<GLfloat> coord;
@@ -107,7 +107,7 @@ namespace scene {
     };
 
     template <typename T>
-    std::istream& operator>>(std::istream& is, scene_t<T>& sc) {
+    inline std::istream& operator>>(std::istream& is, scene_t<T>& sc) {
         int count;
         is >> count;
         if (!is.good())
@@ -128,7 +128,7 @@ namespace scene {
         return is;
     }
 
-    std::vector<std::string> get_sorted_files(const std::filesystem::path& path) {
+    inline std::vector<std::string> get_sorted_files(const std::filesystem::path& path) {
         std::vector<std::string> files;
 
         for (const auto& entry : std::filesystem::directory_iterator(path))
@@ -138,7 +138,7 @@ namespace scene {
         return files;
     }
 
-    std::vector<scene::scene_t<float>> get_scenes_default(const std::filesystem::path& scenes_path) {
+    inline std::vector<scene::scene_t<float>> get_scenes_default(const std::filesystem::path& scenes_path) {
         std::vector<std::string> scenes_data = get_sorted_files(scenes_path);
         std::vector<scene::scene_t<float>> scenes(scenes_data.size());
         for (int i = 0, end = scenes_data.size(); i < end; ++i) {
@@ -149,7 +149,7 @@ namespace scene {
         return scenes;
     }
 
-    std::vector<scene::scene_t<float>> get_scenes_cmd(const std::string& file) {
+    inline std::vector<scene::scene_t<float>> get_scenes_cmd(const std::string& file) {
         std::vector<scene::scene_t<float>> scenes(1);
         std::ifstream data(file);
         data >> scenes[0];
@@ -157,7 +157,7 @@ namespace scene {
         return scenes;
     }
 
-    std::vector<scene::scene_t<float>> get_scenes(int argc, char* argv[],
+    inline std::vector<scene::scene_t<float>> get_scenes(int argc, char* argv[],
                                                   const std::filesystem::path& scenes_path) {
         std::vector<scene::scene_t<float>> scenes;
         if (argc == 2) {
