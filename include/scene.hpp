@@ -12,13 +12,10 @@
 
 namespace scene {
 
-    class error_t final : std::exception {
-        std::string msg_;
-    
+    class error_t : public std::runtime_error {
     public:
-        error_t(const char*        msg) : msg_(msg) {}
-        error_t(const std::string& msg) : msg_(msg) {}
-        const char* what() const noexcept { return msg_.c_str(); }
+        error_t(const char*        msg) : std::runtime_error(msg) {}
+        error_t(const std::string& msg) : std::runtime_error(msg) {}
     };
 
     enum class triangle_type_e {
