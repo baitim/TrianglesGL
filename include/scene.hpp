@@ -11,13 +11,6 @@
 #include <vector>
 
 namespace scene {
-
-    class error_t : public std::runtime_error {
-    public:
-        error_t(const char*        msg) : std::runtime_error(msg) {}
-        error_t(const std::string& msg) : std::runtime_error(msg) {}
-    };
-
     enum class triangle_type_e {
         TRIANGLE_TYPE_NOT_INTERSECT,
         TRIANGLE_TYPE_INTERSECT
@@ -111,9 +104,9 @@ namespace scene {
         int count;
         is >> count;
         if (!is.good())
-            throw error_t{"invalid count of scenes"};
+            throw common::error_t{str_red("Invalid count of scenes")};
         if (count <= 0)
-            throw error_t{"count of scenes <= 0"};
+            throw common::error_t{str_red("Count of scenes <= 0")};
 
         sc.count_ = count;
         sc.triangles_.resize(count);
@@ -121,7 +114,7 @@ namespace scene {
         for (int i = 0; i < count; ++i) {
             is >> sc.triangles_[i];
             if (!is.good())
-                throw error_t{"triangle was entered incorrectly"};
+                throw common::error_t{str_red("Triangle was entered incorrectly")};
         }
         sc.preset();
 

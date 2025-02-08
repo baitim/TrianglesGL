@@ -1,11 +1,10 @@
 #pragma once
 
+#include "common.hpp"
 #include <GL/glew.h>
 #include <iostream>
 #include <vector>
-#include <sstream>
 #include <string>
-#include <fstream>
 
 namespace shader {
     class shader_t final {
@@ -14,32 +13,23 @@ namespace shader {
         GLuint shader_id_;
 
     private:
-        void get_code(const std::string& file_path) {
-            std::ifstream shader_stream(file_path, std::ios::in);
-            if (shader_stream.is_open()) {
-                std::stringstream sstr;
-                sstr << shader_stream.rdbuf();
-                shader_code_ = sstr.str();
-                shader_stream.close();
-            }
-        }
-
         void process_installation_result(GLint result) const {
             if (result)
                 return;
 
-            std::cerr << "Error in install shader\n";
+            std::string error_str = "Error in install shader\n";
             int info_log_length;
             glGetShaderiv(shader_id_, GL_INFO_LOG_LENGTH, &info_log_length);
             if (info_log_length > 0) {
                 std::vector<char> error_message(info_log_length + 1);
                 glGetShaderInfoLog(shader_id_, info_log_length, NULL, &error_message[0]);
-                std::cerr << &error_message[0] << "\n";
+                error_str += &error_message[0];
             }
+            throw common::error_t{str_red(error_str)};
         }
 
         void install(const std::string& file_path) {
-            get_code(file_path);
+            shader_code_ = common::file2str(file_path);
 
             shader_id_ = glCreateShader(shader_type_);
             char const* code = shader_code_.c_str();
@@ -72,14 +62,15 @@ namespace shader {
             if (result)
                 return;
 
-            std::cerr << "Error in create shaders program\n";
+            std::string error_str = "Error in create shaders program\n";
             int info_log_length;
             glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &info_log_length);
             if (info_log_length > 0) {
                 std::vector<char> error_message(info_log_length + 1);
                 glGetProgramInfoLog(program_id, info_log_length, NULL, &error_message[0]);
-                std::cerr <<  &error_message[0] << "\n";
+                error_str += &error_message[0];
             }
+            throw common::error_t{str_red(error_str)};
         }
 
         void delete_attached_shaders(GLuint program_id) {

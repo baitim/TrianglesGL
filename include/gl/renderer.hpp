@@ -16,10 +16,8 @@ namespace renderer {
     private:
         void init_gl() const {
             glewExperimental = true;
-            if (glewInit() != GLEW_OK) {
-                std::cerr << "Unable to initialize GLEW\n";
-                return;
-            }
+            if (glewInit() != GLEW_OK)
+                throw common::error_t{str_red("Unable to initialize GLEW")};
 
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_CULL_FACE);
