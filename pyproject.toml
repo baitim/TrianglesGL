@@ -1,0 +1,10 @@
+[project]
+name = "triangles_gl"
+version = "1.0"
+readme = "README.md"
+requires-python = ">=3.11"
+
+[tool.uv]
+dev-dependencies = [
+  "conan>=2.8.0",
+]
