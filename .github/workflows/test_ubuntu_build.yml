@@ -34,6 +34,7 @@ jobs:
       - name: CMake release config
         run: |
           conan install . --build=missing -s compiler.cppstd=gnu20 -s build_type=Release
+          git submodule update --init --recursive
           cmake --preset release
           cmake --build build
 
@@ -46,6 +47,7 @@ jobs:
       - name: CMake debug config
         run: |
           conan install . --build=missing -s compiler.cppstd=gnu20 -s build_type=Debug
+          git submodule update --init --recursive
           cmake --preset debug
           cmake --build build
 
