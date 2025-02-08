@@ -37,9 +37,9 @@ namespace window {
         }
 
     public:
-        window_t(const sf::VideoMode& window_video_mode, const std::string& window_name,
-                 const sf::ContextSettings& context) {
-            window_.create(window_video_mode, window_name, sf::Style::Default, context);
+        window_t(const sf::VideoMode& window_video_mode, const std::string& window_name) {
+            window_.create(window_video_mode, window_name, sf::Style::Default,
+                           sf::ContextSettings(24, 8, 0, 3, 3));
         }
 
         void main_cycle(renderer::renderer_t& renderer, user::user_t& user,

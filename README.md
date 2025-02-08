@@ -23,10 +23,11 @@
     <code>git submodule update --init --recursive</code>
 
 6. Build <br>
-    <code>cmake . -B build -DCMAKE_TOOLCHAIN_FILE=build/Release/generators/conan_toolchain.cmake; cmake --build build</code>
+    <code>cmake --preset release</code><br>
+    <code>cmake --build build</code>
 
 7. Run <br>
-    <code>./build/src/scene</code> <br>
+    <code>./build/src/scene [scene.in]?</code> <br>
 
 ## How to test
 

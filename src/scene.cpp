@@ -10,9 +10,7 @@ int main(int argc, char* argv[]) {
 
     int w_width  = 800;
     int w_height = 600;
-    window::window_t window(sf::VideoMode(w_width, w_height),
-                            "Triangles",
-                            sf::ContextSettings(24, 8, 0, 3, 3));    
+    window::window_t window(sf::VideoMode(w_width, w_height), "Triangles");    
 
     std::string file{__FILE__};
     std::filesystem::path dir = file.substr(0, file.rfind("/"));
@@ -24,11 +22,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    renderer::shaders_t shaders = {{{dir / "../include/gl/triangles.vs",  GL_VERTEX_SHADER},
-                                    {dir / "../include/gl/triangles.fs",  GL_FRAGMENT_SHADER}},
-                                   {{dir / "../include/gl/shadow_map.vs", GL_VERTEX_SHADER},
-                                    {dir / "../include/gl/shadow_map.fs", GL_FRAGMENT_SHADER}}};
-    renderer::renderer_t renderer(shaders, scenes[0].get_data(), w_width, w_height);
+    std::string path2shaders = dir / "../include/gl/shaders/";
+    shader::shaders_pack_t triangles_shaders{{{path2shaders + "triangles.vs", GL_VERTEX_SHADER},
+                                              {path2shaders + "triangles.fs", GL_FRAGMENT_SHADER}}};
+    shader::shaders_pack_t shadow_shaders{{{path2shaders + "shadow_map.vs", GL_VERTEX_SHADER},
+                                           {path2shaders + "shadow_map.fs", GL_FRAGMENT_SHADER}}};
+    renderer::renderer_t renderer(triangles_shaders, shadow_shaders,
+                                  scenes[0].get_data(), w_width, w_height);
 
     glm::vec3 user_start_position = glm::vec3(0.f, 0.f, -7.f);
     glm::vec3 user_speed          = glm::vec3(.07f, .07f, .07f);
