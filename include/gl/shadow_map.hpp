@@ -8,12 +8,18 @@ namespace shadow_map {
 
         shader::shaders_pack_t shaders_;
         GLuint shadow_map_id_;
+
+        int width_ = 0;
+        int height_ = 0;
         
         glm::mat4 depth_MVP_;
         glm::vec3 light_direction_;
 
     private:
         void init_texture(int width, int height) {
+            width_  = width;
+            height_ = height;
+
             glGenTextures(1, &shadow_map_id_);
             glBindTexture(GL_TEXTURE_2D, shadow_map_id_);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width,
@@ -67,7 +73,9 @@ namespace shadow_map {
                                                 light_direction_(rhs.light_direction_) {
             glGenTextures(1, &shadow_map_id_);
             glBindTexture(GL_TEXTURE_2D, shadow_map_id_);
-            glCopyImageSubData(rhs.shadow_map_id_, GL_TEXTURE_2D, 0, 0, 0, 0, shadow_map_id_, GL_TEXTURE_2D, 0, 0, 0, 0, 1024, 1024, 1);
+            glCopyImageSubData(rhs.shadow_map_id_, GL_TEXTURE_2D, 0, 0, 0, 0,
+                               shadow_map_id_, GL_TEXTURE_2D, 0, 0, 0, 0,
+                               rhs.width_, rhs.height_, 1);
         }
 
         shadow_map_t& operator=(const shadow_map_t& rhs) {
