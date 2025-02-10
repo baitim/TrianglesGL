@@ -55,10 +55,45 @@ namespace shadow_map {
             glDeleteFramebuffers(1, &VBO);
         }
 
+        void clear_memory() {
+            glDeleteTextures(1, &shadow_map_id_);
+        }
+
     public:
         shadow_map_t(const shader::shaders_pack_t& shaders) : shaders_(shaders) {}
 
+        shadow_map_t(const shadow_map_t& rhs) : shaders_(rhs.shaders_),
+                                                depth_MVP_(rhs.depth_MVP_),
+                                                light_direction_(rhs.light_direction_) {
+            glGenTextures(1, &shadow_map_id_);
+            glBindTexture(GL_TEXTURE_2D, shadow_map_id_);
+            glCopyImageSubData(rhs.shadow_map_id_, GL_TEXTURE_2D, 0, 0, 0, 0, shadow_map_id_, GL_TEXTURE_2D, 0, 0, 0, 0, 1024, 1024, 1);
+        }
+
+        shadow_map_t& operator=(const shadow_map_t& rhs) {
+            if (this == &rhs)
+                return *this;
+
+            shadow_map_t new_shadow_map{rhs};
+            std::swap(*this, new_shadow_map);
+            return *this;
+        }
+
+        shadow_map_t(shadow_map_t&& rhs) noexcept : shaders_(std::move(rhs.shaders_)), 
+                                                    shadow_map_id_(std::exchange(rhs.shadow_map_id_, 0)),
+                                                    depth_MVP_(std::move(rhs.depth_MVP_)),
+                                                    light_direction_(std::move(rhs.light_direction_)) {}
+
+        shadow_map_t& operator=(shadow_map_t&& rhs) noexcept {
+            shadow_map_id_ = std::exchange(rhs.shadow_map_id_, 0);
+            std::swap(shaders_, rhs.shaders_);
+            std::swap(depth_MVP_, rhs.depth_MVP_);
+            std::swap(light_direction_, rhs.light_direction_);
+            return *this;
+        }
+
         void init(GLuint program_id, const scene::light_t& light, int count_vertices) {
+            clear_memory();
             light_direction_ = light.light_direction;
 
             shaders_.load_shaders(program_id);
@@ -90,13 +125,8 @@ namespace shadow_map {
                         light_dir.x, light_dir.y, light_dir.z);
         }
 
-        void clear_memory() const {
-            glDeleteTextures(1, &shadow_map_id_);
-        }
-
         ~shadow_map_t() {
             clear_memory();
-            shaders_.clear_memory();
         }
     };
 }

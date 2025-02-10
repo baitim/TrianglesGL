@@ -16,6 +16,27 @@ namespace program {
             start_time_ = std::chrono::high_resolution_clock::now();
         }
 
+        program_t(const program_t& rhs) : program_id_(glCreateProgram()),
+                                          start_time_(rhs.start_time_) {}
+
+        program_t& operator=(const program_t& rhs) {
+            if (this == &rhs) 
+                return *this;
+
+            program_t new_program{rhs};
+            std::swap(*this, new_program);
+            return *this;
+        }
+
+        program_t(program_t&& rhs) noexcept : program_id_(std::exchange(rhs.program_id_, 0)),
+                                              start_time_(std::move(rhs.start_time_)) {}
+
+        program_t& operator=(program_t&& rhs) noexcept {
+            program_id_ = std::exchange(rhs.program_id_, 0);
+            std::swap(start_time_, rhs.start_time_);
+            return *this;
+        }
+
         void set_uniform_time() const {
             auto elapsed_time = std::chrono::high_resolution_clock::now();
             std::chrono::duration<float> elapsed_seconds = elapsed_time - start_time_;
@@ -27,12 +48,8 @@ namespace program {
         GLuint  id() const noexcept { return program_id_; }
         GLuint& id()       noexcept { return program_id_; }
 
-        void clear_memory() const {
-            glDeleteProgram(program_id_);
-        }
-
         ~program_t() {
-            clear_memory();
+            glDeleteProgram(program_id_);
         }
     };
 }

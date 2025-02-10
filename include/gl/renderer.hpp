@@ -96,7 +96,6 @@ namespace renderer {
         }
 
         void rebind_scene(const scene::data2render_t& data2render, int w_width, int w_height) {
-            clear_memory();
             start_program(data2render, w_width, w_height);
         }
 
@@ -107,13 +106,6 @@ namespace renderer {
             glOrtho(0, width, 0, height, -1.0, 1.0);
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
-        }
-
-        void clear_memory() const {
-            program_.clear_memory();
-            shadow_map_.clear_memory();
-            vertex_array_.clear_memory();
-            triangles_shaders_.clear_memory();
         }
     };
 }

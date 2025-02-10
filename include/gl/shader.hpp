@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <utility>
 
 namespace shader {
     class shader_t final {
@@ -28,9 +29,7 @@ namespace shader {
             throw common::error_t{str_red(error_str)};
         }
 
-        void install(const std::string& file_path) {
-            shader_code_ = common::file2str(file_path);
-
+        void install() {
             shader_id_ = glCreateShader(shader_type_);
             char const* code = shader_code_.c_str();
             glShaderSource(shader_id_, 1, &code , NULL);
@@ -42,8 +41,35 @@ namespace shader {
         }
 
     public:
-        shader_t(const std::string& file_path, GLenum shader_type) : shader_type_(shader_type) {
-            install(file_path);
+        shader_t(const std::string& file_path, GLenum shader_type)
+        : shader_code_(common::file2str(file_path)), shader_type_(shader_type) {
+            install();
+        }
+
+        shader_t(const shader_t& rhs) : shader_code_(rhs.shader_code_),
+                                        shader_type_(rhs.shader_type_),
+                                        shader_id_(glCreateShader(rhs.shader_type_)) {
+            install();
+        }
+
+        shader_t& operator=(const shader_t& rhs) {
+            if (this == &rhs)
+                return *this;
+
+            shader_t new_shader{rhs};
+            std::swap(*this, new_shader);
+            return *this;
+        }
+
+        shader_t(shader_t&& rhs) noexcept : shader_code_(std::move(rhs.shader_code_)),
+                                            shader_type_(rhs.shader_type_),
+                                            shader_id_(std::exchange(rhs.shader_id_, 0)) {}
+
+        shader_t& operator=(shader_t&& rhs) noexcept {
+            shader_id_ = std::exchange(rhs.shader_id_, 0);
+            std::swap(shader_code_, rhs.shader_code_);
+            std::swap(shader_type_, rhs.shader_type_);
+            return *this;
         }
 
         GLuint id() const noexcept { return shader_id_; }
@@ -96,15 +122,6 @@ namespace shader {
             process_creation_result(program_id, result);
 
             delete_attached_shaders(program_id);
-        }
-
-        void clear_memory() const {
-            for (auto shader : shaders_)
-                glDeleteShader(shader.second);
-        }
-
-        ~shaders_pack_t() {
-            clear_memory();
         }
     };
 }
