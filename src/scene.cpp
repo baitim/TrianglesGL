@@ -1,4 +1,4 @@
-#include "window.hpp"
+#include "TrianglesGL/window.hpp"
 
 int main(int argc, char* argv[]) {
     if (argc > 2) {

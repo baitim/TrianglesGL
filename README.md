@@ -4,6 +4,10 @@
 
  Implementation of the rendering triangles with OpenGl.
 
+## How to integrate
+ 
+ use [storage](https://github.com/baitim/ConanPackages), project = "trianglesgl", version = "1.0", user = "baitim"
+
 ## How to run
 
 1. Clone <br>
@@ -13,35 +17,22 @@
     <code>cd TrianglesGL</code>
 
 3. Prepare conan <br>
+    conan installation: <code>uv sync --group dev; source .venv/bin/activate</code><br>
     <code>conan profile detect --force</code>
 
-4. Init dependencies <br>
-    <code>conan install . --build=missing -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=True -s compiler.cppstd=gnu20</code> <br>
+4. Add conan required packages from [storage](https://github.com/baitim/ConanPackages)<br>
+    <code>conan remote add conan_packages http://188.225.84.75:9300</code>
+
+5. Init dependencies <br>
+    <code>conan install . --build=missing -s compiler.cppstd=gnu20</code><br>
     maybe you will need these flags for the conan <code>-s build_type=Debug</code>
-    
-5. Init submodules <br>
-    <code>git submodule update --init --recursive</code>
 
 6. Build <br>
     <code>cmake --preset release</code><br>
-    <code>cmake --build build</code>
+    <code>cmake --build build/Release</code>
 
 7. Run <br>
-    <code>./build/src/scene [scene.in]?</code> <br>
-
-## How to test
-
-1. Prepare
-    - Go to folder <br>
-        <code>cd Triangles3D/tests/end_to_end</code>
-
-    - Generate tests <br>
-        <code>python3 generate.py</code>
-
-2. Testing
-    - End to end & Unit<br>
-        in root dir <code>ctest --test-dir build/Triangles3D</code> <br>
-        maybe you will need these flags for the ctest <code>--rerun-failed --output-on-failure</code>
+    <code>./build/Release/src/scene [scene.in]?</code> <br>
 
 ## How to use
 
@@ -64,7 +55,7 @@
 
 ## Features
 
-1. Tested project building in ubuntu:latest
+1. Tested project building in ubuntu-24.04
 2. Changing the scene during execution
 2. Smart shadows
 

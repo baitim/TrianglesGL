@@ -1,7 +1,7 @@
 #pragma once
 
-#include "user.hpp"
-#include "scene.hpp"
+#include "TrianglesGL/user.hpp"
+#include "TrianglesGL/scene.hpp"
 
 namespace window {
 

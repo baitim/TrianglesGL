@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shader.hpp"
+#include "TrianglesGL/gl/shader.hpp"
 #include <chrono>
 #include <cmath>
 

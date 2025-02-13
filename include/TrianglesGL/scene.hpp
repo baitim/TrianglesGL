@@ -1,6 +1,6 @@
 #pragma once
 
-#include "octree.hpp"
+#include "Triangles3D/octree.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>

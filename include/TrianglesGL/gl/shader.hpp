@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.hpp"
+#include "TrianglesGL/common.hpp"
 #include <GL/glew.h>
 #include <iostream>
 #include <vector>

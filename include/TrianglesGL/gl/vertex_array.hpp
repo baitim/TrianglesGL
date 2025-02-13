@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scene.hpp"
+#include "TrianglesGL/scene.hpp"
 #include <bit>
 
 namespace vertex_array {

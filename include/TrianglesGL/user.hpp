@@ -1,6 +1,6 @@
 #pragma once
 
-#include "renderer.hpp"
+#include "TrianglesGL/gl/renderer.hpp"
 #include <SFML/Window.hpp>
 
 namespace user {

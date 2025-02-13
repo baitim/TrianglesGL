@@ -1,7 +1,7 @@
 #pragma once
 
-#include "scene.hpp"
-#include "shader.hpp"
+#include "TrianglesGL/scene.hpp"
+#include "TrianglesGL/gl/shader.hpp"
 
 namespace shadow_map {
     class shadow_map_t final {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "program.hpp"
-#include "shadow_map.hpp"
-#include "vertex_array.hpp"
+#include "TrianglesGL/gl/program.hpp"
+#include "TrianglesGL/gl/shadow_map.hpp"
+#include "TrianglesGL/gl/vertex_array.hpp"
 
 namespace renderer {
     class renderer_t final {
