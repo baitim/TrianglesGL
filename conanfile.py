@@ -56,5 +56,5 @@ class matrixChainRecipe(ConanFile):
         self.cpp_info.set_property("cmake_find_mode", "config")
         self.cpp_info.set_property("cmake_file_name", "TrianglesGL")
         self.cpp_info.set_property("cmake_target_name", "TrianglesGL::TrianglesGL")
-        self.cpp_info.libs = ["trianglesgl"]
+        self.cpp_info.libs = ["TrianglesGL"]
         self.cpp_info.includedirs = ["include"]
