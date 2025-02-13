@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
         std::vector<scene::scene_t<float>> scenes;
         scenes = scene::get_scenes(argc, argv, dir / "../scenes/scenes_in");
 
-        std::string path2shaders = dir / "../include/gl/shaders/";
+        std::string path2shaders = dir / "../include/TrianglesGL/gl/shaders/";
         shader::shaders_pack_t triangles_shaders{{{path2shaders + "triangles.vs", GL_VERTEX_SHADER},
                                                   {path2shaders + "triangles.fs", GL_FRAGMENT_SHADER}}};
         shader::shaders_pack_t shadow_shaders{{{path2shaders + "shadow_map.vs", GL_VERTEX_SHADER},
