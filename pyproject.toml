@@ -1,5 +1,5 @@
 [project]
-name = "triangles_gl"
+name = "trianglesgl"
 version = "1.0"
 readme = "README.md"
 requires-python = ">=3.11"
