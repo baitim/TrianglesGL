@@ -28,6 +28,6 @@ namespace common {
             input_file.close();
             return sstr.str();
         }
-        throw common::error_t{str_red("Can't open program file")};
+        throw common::error_t{str_red("Can't open file")};
     }
 }
