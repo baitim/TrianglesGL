@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 
 
-class matrixChainRecipe(ConanFile):
+class trianglesglRecipe(ConanFile):
     name = "trianglesgl"
     version = "1.0"
     user = "baitim"
