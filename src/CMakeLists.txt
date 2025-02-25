@@ -11,6 +11,13 @@ find_package(SFML          REQUIRED COMPONENTS window)
 
 find_package(Triangles3D   REQUIRED)
 
+set(SHADER_SOURCES ${CMAKE_SOURCE_DIR}/include/TrianglesGL/gl/shaders)
+set(SHADER_OUTPUT_DIR ${CMAKE_BINARY_DIR})
+file(COPY ${SHADER_SOURCES} DESTINATION ${SHADER_OUTPUT_DIR})
+set(SCENES_SOURCES ${CMAKE_SOURCE_DIR}/scenes/scenes_in)
+set(SCENES_OUTPUT_DIR ${CMAKE_BINARY_DIR})
+file(COPY ${SCENES_SOURCES} DESTINATION ${SCENES_OUTPUT_DIR})
+
 add_executable(scene scene.cpp)
 target_sources(scene
     PRIVATE
@@ -25,6 +32,7 @@ target_link_libraries(scene PRIVATE
     sfml-window
     Triangles3D::Triangles3D
 )
+target_compile_definitions(scene PRIVATE CMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}")
 
 add_library(TrianglesGL scene.cpp)
 target_include_directories(TrianglesGL PUBLIC

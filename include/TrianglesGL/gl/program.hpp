@@ -32,20 +32,16 @@ namespace triangles_gl {
                 glDetachShader(program_id_, attached_shaders[i]);
         }
 
-        void init(std::vector<shader_t> shaders) {
+    public:
+        program_t(std::vector<shader_t> shaders) : shaders_(shaders) {
             program_id_ = glCreateProgram();
-            for (auto shader : shaders)
+            for (auto shader : shaders_)
                 glAttachShader(program_id_, shader.id());
             glLinkProgram(program_id_);
 
             GLint result;
             glGetProgramiv(program_id_, GL_LINK_STATUS, &result);
             process_creation_result(program_id_, result);
-        }
-
-    public:
-        program_t(std::vector<shader_t> shaders) : shaders_(shaders) {
-            init(shaders_);
         }
 
         program_t(const program_t& rhs) : program_t(rhs.shaders_) {}
@@ -64,7 +60,7 @@ namespace triangles_gl {
 
         program_t& operator=(program_t&& rhs) noexcept {
             program_id_ = std::exchange(rhs.program_id_, 0);
-            shaders_ = std::exchange(rhs.shaders_, {});
+            shaders_ = std::move(rhs.shaders_);
             return *this;
         }
 
