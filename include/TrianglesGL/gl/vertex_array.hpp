@@ -3,7 +3,7 @@
 #include "TrianglesGL/scene.hpp"
 #include <bit>
 
-namespace vertex_array {
+namespace triangles_gl {
     class vertex_array_t final {
         GLuint VAO_ = 0;
         GLuint VBO_ = 0;
@@ -27,7 +27,7 @@ namespace vertex_array {
             glEnableVertexAttribArray(1);
             glEnableVertexAttribArray(2);
             
-            using data = scene::vertex2render_t;
+            using data = vertex2render_t;
             size_t vertex_size = sizeof(data);
             void* coord_offset   = std::bit_cast<void*>(offsetof(data, coord));
             void* normal_offset  = std::bit_cast<void*>(offsetof(data, normal));
@@ -73,10 +73,10 @@ namespace vertex_array {
             return *this;
         }
 
-        void bind_vertices(const std::vector<scene::vertex2render_t>& vertices) {
+        void bind_vertices(const std::vector<vertex2render_t>& vertices) {
             clear_memory();
 
-            size_t vertex_size = sizeof(scene::vertex2render_t);
+            size_t vertex_size = sizeof(vertex2render_t);
 
             bind_VAO_VBO();
             glBufferData(GL_ARRAY_BUFFER, vertices.size() * vertex_size,

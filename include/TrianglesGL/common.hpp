@@ -4,7 +4,7 @@
 #include <sstream>
 #include <fstream>
 
-namespace common {
+namespace triangles_gl {
 
     template <typename MsgT>
     concept error_str =
@@ -17,17 +17,16 @@ namespace common {
     public:
         template <error_str MsgT>
         error_t(MsgT msg) : std::runtime_error(msg) {}
-        using std::runtime_error::what;
     };
 
-    inline std::string file2str(const std::string& file_name) {
-        std::ifstream input_file(file_name);
+    inline std::string file2str(std::string_view file_name) {
+        std::ifstream input_file{std::string(file_name)};
         if (input_file.is_open()) {
             std::stringstream sstr;
             sstr << input_file.rdbuf();
             input_file.close();
             return sstr.str();
         }
-        throw common::error_t{str_red("Can't open file")};
+        throw error_t{"Can't open file"};
     }
 }

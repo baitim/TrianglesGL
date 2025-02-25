@@ -10,7 +10,7 @@
 #include <exception>
 #include <vector>
 
-namespace scene {
+namespace triangles_gl {
     enum class triangle_type_e {
         TRIANGLE_TYPE_NOT_INTERSECT,
         TRIANGLE_TYPE_INTERSECT
@@ -104,9 +104,9 @@ namespace scene {
         int count;
         is >> count;
         if (!is.good())
-            throw common::error_t{str_red("Invalid count of scenes")};
+            throw error_t{str_red("Invalid count of scenes")};
         if (count <= 0)
-            throw common::error_t{str_red("Count of scenes <= 0")};
+            throw error_t{str_red("Count of scenes <= 0")};
 
         sc.count_ = count;
         sc.triangles_.resize(count);
@@ -114,7 +114,7 @@ namespace scene {
         for (int i = 0; i < count; ++i) {
             is >> sc.triangles_[i];
             if (!is.good())
-                throw common::error_t{str_red("Triangle was entered incorrectly")};
+                throw error_t{str_red("Triangle was entered incorrectly")};
         }
         sc.preset();
 
@@ -131,9 +131,9 @@ namespace scene {
         return files;
     }
 
-    inline std::vector<scene::scene_t<float>> get_scenes_default(const std::filesystem::path& scenes_path) {
+    inline std::vector<scene_t<float>> get_scenes_default(const std::filesystem::path& scenes_path) {
         std::vector<std::string> scenes_data = get_sorted_files(scenes_path);
-        std::vector<scene::scene_t<float>> scenes(scenes_data.size());
+        std::vector<scene_t<float>> scenes(scenes_data.size());
         for (int i = 0, end = scenes_data.size(); i < end; ++i) {
             std::ifstream data(scenes_data[i]);
             data >> scenes[i];
@@ -142,21 +142,21 @@ namespace scene {
         return scenes;
     }
 
-    inline std::vector<scene::scene_t<float>> get_scenes_cmd(const std::string& file) {
-        std::vector<scene::scene_t<float>> scenes(1);
+    inline std::vector<scene_t<float>> get_scenes_cmd(const std::string& file) {
+        std::vector<scene_t<float>> scenes(1);
         std::ifstream data(file);
         data >> scenes[0];
         data.close();
         return scenes;
     }
 
-    inline std::vector<scene::scene_t<float>> get_scenes(int argc, char* argv[],
+    inline std::vector<scene_t<float>> get_scenes(int argc, char* argv[],
                                                   const std::filesystem::path& scenes_path) {
-        std::vector<scene::scene_t<float>> scenes;
+        std::vector<scene_t<float>> scenes;
         if (argc == 2) {
-            scenes = scene::get_scenes_cmd(argv[1]);
+            scenes = get_scenes_cmd(argv[1]);
         } else {
-            scenes = scene::get_scenes_default(scenes_path);
+            scenes = get_scenes_default(scenes_path);
         }
         return scenes;
     }

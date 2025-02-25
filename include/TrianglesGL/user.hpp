@@ -3,7 +3,7 @@
 #include "TrianglesGL/gl/renderer.hpp"
 #include <SFML/Window.hpp>
 
-namespace user {
+namespace triangles_gl {
 
     enum class window_event_e {
         DEFAULT,

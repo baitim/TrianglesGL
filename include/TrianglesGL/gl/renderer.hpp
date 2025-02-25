@@ -4,20 +4,20 @@
 #include "TrianglesGL/gl/shadow_map.hpp"
 #include "TrianglesGL/gl/vertex_array.hpp"
 
-namespace renderer {
+namespace triangles_gl {
     class renderer_t final {
-        shader::shaders_pack_t triangles_shaders_;
+        shaders_pack_t triangles_shaders_;
 
-        program::program_t           program_;
-        shadow_map::shadow_map_t     shadow_map_;
-        vertex_array::vertex_array_t vertex_array_;
+        program_t      program_;
+        shadow_map_t   shadow_map_;
+        vertex_array_t vertex_array_;
         int count_vertices_ = 0;
 
     private:
         void init_gl() const {
             glewExperimental = true;
             if (glewInit() != GLEW_OK)
-                throw common::error_t{str_red("Unable to initialize GLEW")};
+                throw error_t{str_red("Unable to initialize GLEW")};
 
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_CULL_FACE);
@@ -45,7 +45,7 @@ namespace renderer {
             glUniform1i(glGetUniformLocation(program_.id(), "is_cw"), is_cw);
         }
 
-        void start_program(const scene::data2render_t& data2render, 
+        void start_program(const data2render_t& data2render, 
                            int w_width, int w_height) {
             count_vertices_ = data2render.vertices_.size();
             vertex_array_.bind_vertices(data2render.vertices_);
@@ -74,9 +74,9 @@ namespace renderer {
         }
 
     public:
-        renderer_t(const shader::shaders_pack_t& triangles_shaders,
-                   const shader::shaders_pack_t& shadow_shaders,
-                   const scene::data2render_t& data2render,
+        renderer_t(const shaders_pack_t& triangles_shaders,
+                   const shaders_pack_t& shadow_shaders,
+                   const data2render_t& data2render,
                    int w_width, int w_height)
                    : triangles_shaders_(triangles_shaders), shadow_map_(shadow_shaders) {
             init_gl();
@@ -95,7 +95,7 @@ namespace renderer {
             render_ccw();
         }
 
-        void rebind_scene(const scene::data2render_t& data2render, int w_width, int w_height) {
+        void rebind_scene(const data2render_t& data2render, int w_width, int w_height) {
             start_program(data2render, w_width, w_height);
         }
 

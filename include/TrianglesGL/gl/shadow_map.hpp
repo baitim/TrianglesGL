@@ -3,10 +3,10 @@
 #include "TrianglesGL/scene.hpp"
 #include "TrianglesGL/gl/shader.hpp"
 
-namespace shadow_map {
+namespace triangles_gl {
     class shadow_map_t final {
 
-        shader::shaders_pack_t shaders_;
+        shaders_pack_t shaders_;
         GLuint shadow_map_id_;
 
         int width_ = 0;
@@ -39,7 +39,7 @@ namespace shadow_map {
                                    GL_TEXTURE_2D, shadow_map_id_, 0);
         }
 
-        void set_uniform_depth_MVP(GLuint program_id, const scene::light_t& l) {
+        void set_uniform_depth_MVP(GLuint program_id, const light_t& l) {
             glm::mat4 depth_view_matrix = glm::lookAt(l.light_position, l.light_direction, l.light_up);
             glm::mat4 depth_model_matrix = glm::mat4(1.0);
             depth_MVP_ = l.depth_projection_matrix * depth_view_matrix * depth_model_matrix;
@@ -47,7 +47,7 @@ namespace shadow_map {
                                1, GL_FALSE, &depth_MVP_[0][0]);
         }
 
-        void draw_shadows(GLuint program_id, const scene::light_t& light, int count_vertices) {
+        void draw_shadows(GLuint program_id, const light_t& light, int count_vertices) {
             init_texture(light.width, light.height);
             
             GLuint VBO;
@@ -66,7 +66,7 @@ namespace shadow_map {
         }
 
     public:
-        shadow_map_t(const shader::shaders_pack_t& shaders) : shaders_(shaders) {}
+        shadow_map_t(const shaders_pack_t& shaders) : shaders_(shaders) {}
 
         shadow_map_t(const shadow_map_t& rhs) : shaders_(rhs.shaders_),
                                                 depth_MVP_(rhs.depth_MVP_),
@@ -100,7 +100,7 @@ namespace shadow_map {
             return *this;
         }
 
-        void init(GLuint program_id, const scene::light_t& light, int count_vertices) {
+        void init(GLuint program_id, const light_t& light, int count_vertices) {
             clear_memory();
             light_direction_ = light.light_direction;
 

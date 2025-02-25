@@ -7,7 +7,7 @@
 #include <string>
 #include <utility>
 
-namespace shader {
+namespace triangles_gl {
     class shader_t final {
         std::string shader_code_;
         GLenum shader_type_;
@@ -26,7 +26,7 @@ namespace shader {
                 glGetShaderInfoLog(shader_id_, info_log_length, NULL, &error_message[0]);
                 error_str += &error_message[0];
             }
-            throw common::error_t{str_red(error_str)};
+            throw error_t{str_red(error_str)};
         }
 
         void install() {
@@ -42,7 +42,7 @@ namespace shader {
 
     public:
         shader_t(const std::string& file_path, GLenum shader_type)
-        : shader_code_(common::file2str(file_path)), shader_type_(shader_type) {
+        : shader_code_(file2str(file_path)), shader_type_(shader_type) {
             install();
         }
 
@@ -96,7 +96,7 @@ namespace shader {
                 glGetProgramInfoLog(program_id, info_log_length, NULL, &error_message[0]);
                 error_str += &error_message[0];
             }
-            throw common::error_t{str_red(error_str)};
+            throw error_t{str_red(error_str)};
         }
 
         void delete_attached_shaders(GLuint program_id) {
@@ -114,7 +114,7 @@ namespace shader {
         void load_shaders(GLuint& program_id) {
             program_id = glCreateProgram();
             for (int i = 0, end = shaders_.size(); i < end; ++i)
-                glAttachShader(program_id, shader::shader_t{shaders_[i].first, shaders_[i].second}.id());
+                glAttachShader(program_id, shader_t{shaders_[i].first, shaders_[i].second}.id());
             glLinkProgram(program_id);
 
             GLint result;

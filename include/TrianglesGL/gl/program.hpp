@@ -1,10 +1,11 @@
 #pragma once
 
 #include "TrianglesGL/gl/shader.hpp"
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 
-namespace program {
+namespace triangles_gl {
     class program_t final {
         GLuint program_id_;
 
