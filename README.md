@@ -8,6 +8,11 @@
  
  use [storage](https://github.com/baitim/ConanPackages), project = "trianglesgl", version = "1.0", user = "baitim"
 
+## Requirements
+
+* Cmake >= 3.30
+* Conan >= 2.12
+
 ## How to run
 
 1. Clone <br>

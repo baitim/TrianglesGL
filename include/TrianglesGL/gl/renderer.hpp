@@ -15,8 +15,8 @@ namespace triangles_gl {
         int count_vertices_ = 0;
 
         program_t      program_;
-        shadow_map_t   shadow_map_;
         vertex_array_t vertex_array_;
+        shadow_map_t   shadow_map_;
 
     private:
         void set_uniform_time() const {
@@ -51,7 +51,6 @@ namespace triangles_gl {
 
             shadow_map_.set_uniform_shadow_map(program_.id());
             shadow_map_.set_uniform_light_direction(program_.id());
-            shadow_map_.set_uniform_depth_bias_MVP(program_.id());
             set_uniform_colors();
         }
 
@@ -75,8 +74,8 @@ namespace triangles_gl {
                    : start_time_(std::chrono::high_resolution_clock::now()),
                      count_vertices_(data2render.vertices_.size()),
                      program_(triangles_shaders),
-                     shadow_map_(data2render.light_, count_vertices_, shadow_shaders),
-                     vertex_array_(data2render.vertices_) {
+                     vertex_array_(data2render.vertices_),
+                     shadow_map_(data2render.light_, count_vertices_, shadow_shaders) {
             init(data2render, w_width, w_height);
         }
 
@@ -85,6 +84,7 @@ namespace triangles_gl {
 
             set_uniform_time();
             set_uniform_MVP(user_perspective, user_lookat);
+            shadow_map_.set_uniform_depth_bias_MVP(program_.id());
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             render_cw ();
@@ -93,8 +93,8 @@ namespace triangles_gl {
 
         void rebind(const data2render_t& data2render, int w_width, int w_height) {
             count_vertices_ = data2render.vertices_.size();
-            shadow_map_.rebind(data2render.light_, count_vertices_);
             vertex_array_.rebind(data2render.vertices_);
+            shadow_map_.rebind(data2render.light_, count_vertices_);
 
             init(data2render, w_width, w_height);
         }
