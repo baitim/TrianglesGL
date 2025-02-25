@@ -29,8 +29,8 @@ namespace triangles_gl {
             throw error_t{str_red(error_str)};
         }
 
+        // need to glCreateShader() before
         void install() {
-            shader_id_ = glCreateShader(shader_type_);
             char const* code = shader_code_.c_str();
             glShaderSource(shader_id_, 1, &code , NULL);
             glCompileShader(shader_id_);
@@ -43,6 +43,7 @@ namespace triangles_gl {
     public:
         shader_t(const std::string& file_path, GLenum shader_type)
         : shader_code_(file2str(file_path)), shader_type_(shader_type) {
+            shader_id_ = glCreateShader(shader_type_);
             install();
         }
 
