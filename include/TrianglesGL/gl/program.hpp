@@ -1,24 +1,54 @@
 #pragma once
 
 #include "TrianglesGL/gl/shader.hpp"
-#include <algorithm>
-#include <chrono>
-#include <cmath>
 
 namespace triangles_gl {
     class program_t final {
         GLuint program_id_;
+        std::vector<shader_t> shaders_;
 
-        using chrono_time_t = std::chrono::time_point<std::chrono::high_resolution_clock>;
-        chrono_time_t start_time_;
+    private:
+        static void process_creation_result(GLuint program_id, GLint result) {
+            if (result)
+                return;
 
-    public:
-        program_t() {
-            start_time_ = std::chrono::high_resolution_clock::now();
+            std::string error_str = "Error in create shaders program\n";
+            int info_log_length;
+            glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &info_log_length);
+            if (info_log_length > 0) {
+                std::vector<char> error_message(info_log_length + 1);
+                glGetProgramInfoLog(program_id, info_log_length, NULL, &error_message[0]);
+                error_str += &error_message[0];
+            }
+            throw error_t{str_red(error_str)};
         }
 
-        program_t(const program_t& rhs) : program_id_(glCreateProgram()),
-                                          start_time_(rhs.start_time_) {}
+        void detach_shaders() {
+            GLsizei max_count = 2;
+            GLsizei count;
+            GLuint  attached_shaders[max_count];
+            glGetAttachedShaders(program_id_, max_count, &count, attached_shaders);
+            for (int i = 0; i < count; ++i)
+                glDetachShader(program_id_, attached_shaders[i]);
+        }
+
+        void init(std::vector<shader_t> shaders) {
+            program_id_ = glCreateProgram();
+            for (auto shader : shaders)
+                glAttachShader(program_id_, shader.id());
+            glLinkProgram(program_id_);
+
+            GLint result;
+            glGetProgramiv(program_id_, GL_LINK_STATUS, &result);
+            process_creation_result(program_id_, result);
+        }
+
+    public:
+        program_t(std::vector<shader_t> shaders) : shaders_(shaders) {
+            init(shaders_);
+        }
+
+        program_t(const program_t& rhs) : program_t(rhs.shaders_) {}
 
         program_t& operator=(const program_t& rhs) {
             if (this == &rhs) 
@@ -30,26 +60,18 @@ namespace triangles_gl {
         }
 
         program_t(program_t&& rhs) noexcept : program_id_(std::exchange(rhs.program_id_, 0)),
-                                              start_time_(std::move(rhs.start_time_)) {}
+                                              shaders_(std::move(rhs.shaders_)) {}
 
         program_t& operator=(program_t&& rhs) noexcept {
             program_id_ = std::exchange(rhs.program_id_, 0);
-            std::swap(start_time_, rhs.start_time_);
+            shaders_ = std::exchange(rhs.shaders_, {});
             return *this;
         }
 
-        void set_uniform_time() const {
-            auto elapsed_time = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<float> elapsed_seconds = elapsed_time - start_time_;
-            float normalized_time = std::fabs(std::sin(1.5f * elapsed_seconds.count()) / 5.f);
-            float valid_time      = std::clamp(normalized_time, 0.0f, 0.2f);
-            glUniform1f(glGetUniformLocation(program_id_, "time"), valid_time);
-        }
-
-        GLuint  id() const noexcept { return program_id_; }
-        GLuint& id()       noexcept { return program_id_; }
+        GLuint id() const noexcept { return program_id_; }
 
         ~program_t() {
+            detach_shaders();
             glDeleteProgram(program_id_);
         }
     };

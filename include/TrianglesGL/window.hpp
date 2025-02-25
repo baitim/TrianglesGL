@@ -21,7 +21,7 @@ namespace triangles_gl {
                     break;
 
                 case window_event_e::NEW_SCENE:
-                        renderer.rebind_scene(
+                        renderer.rebind(
                             scenes[user.get_number_scene()].get_data(),
                             size.x, size.y
                         );

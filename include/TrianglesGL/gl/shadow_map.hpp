@@ -6,7 +6,7 @@
 namespace triangles_gl {
     class shadow_map_t final {
 
-        shaders_pack_t shaders_;
+        program_t program_;
         GLuint shadow_map_id_;
 
         int width_ = 0;
@@ -47,12 +47,13 @@ namespace triangles_gl {
                                1, GL_FALSE, &depth_MVP_[0][0]);
         }
 
-        void draw_shadows(GLuint program_id, const light_t& light, int count_vertices) {
+        void draw_shadows(const light_t& light, int count_vertices) {
+            glUseProgram(program_.id());
             init_texture(light.width, light.height);
             
             GLuint VBO;
             set_buffer(VBO);
-            set_uniform_depth_MVP(program_id, light);
+            set_uniform_depth_MVP(program_.id(), light);
 
             glViewport(0, 0, light.width, light.height);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -61,14 +62,22 @@ namespace triangles_gl {
             glDeleteFramebuffers(1, &VBO);
         }
 
-        void clear_memory() {
+        void clear() {
             glDeleteTextures(1, &shadow_map_id_);
         }
 
-    public:
-        shadow_map_t(const shaders_pack_t& shaders) : shaders_(shaders) {}
+        void init(const light_t& light, int count_vertices) {
+            light_direction_ = light.light_direction;
+            draw_shadows(light, count_vertices);
+        }
 
-        shadow_map_t(const shadow_map_t& rhs) : shaders_(rhs.shaders_),
+    public:
+        shadow_map_t(const light_t& light, int count_vertices, const std::vector<shader_t>& shaders)
+            : program_(shaders) {
+            init(light, count_vertices);
+        }
+
+        shadow_map_t(const shadow_map_t& rhs) : program_(rhs.program_),
                                                 depth_MVP_(rhs.depth_MVP_),
                                                 light_direction_(rhs.light_direction_) {
             glGenTextures(1, &shadow_map_id_);
@@ -87,26 +96,22 @@ namespace triangles_gl {
             return *this;
         }
 
-        shadow_map_t(shadow_map_t&& rhs) noexcept : shaders_(std::move(rhs.shaders_)), 
+        shadow_map_t(shadow_map_t&& rhs) noexcept : program_(std::move(rhs.program_)), 
                                                     shadow_map_id_(std::exchange(rhs.shadow_map_id_, 0)),
                                                     depth_MVP_(std::move(rhs.depth_MVP_)),
                                                     light_direction_(std::move(rhs.light_direction_)) {}
 
         shadow_map_t& operator=(shadow_map_t&& rhs) noexcept {
             shadow_map_id_ = std::exchange(rhs.shadow_map_id_, 0);
-            std::swap(shaders_, rhs.shaders_);
+            std::swap(program_, rhs.program_);
             std::swap(depth_MVP_, rhs.depth_MVP_);
             std::swap(light_direction_, rhs.light_direction_);
             return *this;
         }
 
-        void init(GLuint program_id, const light_t& light, int count_vertices) {
-            clear_memory();
-            light_direction_ = light.light_direction;
-
-            shaders_.load_shaders(program_id);
-            glUseProgram(program_id);
-            draw_shadows(program_id, light, count_vertices);
+        void rebind(const light_t& light, int count_vertices) {
+            clear();
+            init(light, count_vertices);
         }
 
         void set_uniform_shadow_map(GLuint program_id) const {
@@ -134,7 +139,7 @@ namespace triangles_gl {
         }
 
         ~shadow_map_t() {
-            clear_memory();
+            clear();
         }
     };
 }

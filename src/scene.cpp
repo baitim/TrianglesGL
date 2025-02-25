@@ -12,19 +12,20 @@ int main(int argc, char* argv[]) {
 
     int w_width  = 800;
     int w_height = 600;
-    window_t window(sf::VideoMode(w_width, w_height), "Triangles");    
-
+    window_t window(sf::VideoMode(w_width, w_height), "Triangles");
+    
     std::string file{__FILE__};
     std::filesystem::path dir = file.substr(0, file.rfind("/"));
     try {
+        init_gl();
         std::vector<scene_t<float>> scenes;
         scenes = get_scenes(argc, argv, dir / "../scenes/scenes_in");
 
         std::string path2shaders = dir / "../include/TrianglesGL/gl/shaders/";
-        shaders_pack_t triangles_shaders{{{path2shaders + "triangles.vs", GL_VERTEX_SHADER},
-                                          {path2shaders + "triangles.fs", GL_FRAGMENT_SHADER}}};
-        shaders_pack_t shadow_shaders{{{path2shaders + "shadow_map.vs", GL_VERTEX_SHADER},
-                                       {path2shaders + "shadow_map.fs", GL_FRAGMENT_SHADER}}};
+        std::vector<shader_t> triangles_shaders{{path2shaders + "triangles.vs", GL_VERTEX_SHADER},
+                                                {path2shaders + "triangles.fs", GL_FRAGMENT_SHADER}};
+        std::vector<shader_t> shadow_shaders{{path2shaders + "shadow_map.vs", GL_VERTEX_SHADER},
+                                             {path2shaders + "shadow_map.fs", GL_FRAGMENT_SHADER}};
         renderer_t renderer(triangles_shaders, shadow_shaders,
                                     scenes[0].get_data(), w_width, w_height);
 

@@ -9,7 +9,7 @@ namespace triangles_gl {
         GLuint VBO_ = 0;
 
     private:
-        void clear_memory() {
+        void clear() {
             glDeleteVertexArrays(1, &VAO_);
             glDeleteBuffers(1, &VBO_);
         }
@@ -37,8 +37,19 @@ namespace triangles_gl {
             glVertexAttribIPointer(2, 1, GL_BYTE,            vertex_size, color_offset);
         }
 
+        void init(const std::vector<vertex2render_t>& vertices) {
+            bind_VAO_VBO();
+            
+            size_t vertex_size = sizeof(vertex2render_t);
+            glBufferData(GL_ARRAY_BUFFER, vertices.size() * vertex_size,
+                         vertices.data(), GL_STATIC_DRAW);
+            set_VAO();
+        }
+
     public:
-        vertex_array_t() {}
+        vertex_array_t(const std::vector<vertex2render_t>& vertices) {
+            init(vertices);
+        }
 
         vertex_array_t(const vertex_array_t& rhs) {
             bind_VAO_VBO();
@@ -73,19 +84,13 @@ namespace triangles_gl {
             return *this;
         }
 
-        void bind_vertices(const std::vector<vertex2render_t>& vertices) {
-            clear_memory();
-
-            size_t vertex_size = sizeof(vertex2render_t);
-
-            bind_VAO_VBO();
-            glBufferData(GL_ARRAY_BUFFER, vertices.size() * vertex_size,
-                         vertices.data(), GL_STATIC_DRAW);
-            set_VAO();
+        void rebind(const std::vector<vertex2render_t>& vertices) {
+            clear();
+            init(vertices);
         }
 
         ~vertex_array_t() {
-            clear_memory();
+            clear();
         }
     };
 }

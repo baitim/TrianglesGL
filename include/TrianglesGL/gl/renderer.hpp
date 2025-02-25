@@ -3,29 +3,28 @@
 #include "TrianglesGL/gl/program.hpp"
 #include "TrianglesGL/gl/shadow_map.hpp"
 #include "TrianglesGL/gl/vertex_array.hpp"
+#include <algorithm>
+#include <chrono>
 
 namespace triangles_gl {
     class renderer_t final {
-        shaders_pack_t triangles_shaders_;
+
+        using chrono_time_t = std::chrono::time_point<std::chrono::high_resolution_clock>;
+        chrono_time_t start_time_;
+
+        int count_vertices_ = 0;
 
         program_t      program_;
         shadow_map_t   shadow_map_;
         vertex_array_t vertex_array_;
-        int count_vertices_ = 0;
 
     private:
-        void init_gl() const {
-            glewExperimental = true;
-            if (glewInit() != GLEW_OK)
-                throw error_t{str_red("Unable to initialize GLEW")};
-
-            glEnable(GL_DEPTH_TEST);
-            glEnable(GL_CULL_FACE);
-            glCullFace(GL_BACK);
-            glDepthFunc(GL_LESS);
-            glDepthMask(GL_TRUE);
-
-            glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
+        void set_uniform_time() const {
+            auto elapsed_time = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<float> elapsed_seconds = elapsed_time - start_time_;
+            float normalized_time = std::fabs(std::sin(1.5f * elapsed_seconds.count()) / 5.f);
+            float valid_time      = std::clamp(normalized_time, 0.0f, 0.2f);
+            glUniform1f(glGetUniformLocation(program_.id(), "time"), valid_time);
         }
 
         void set_uniform_MVP(const glm::highp_mat4& user_perspective,
@@ -45,19 +44,14 @@ namespace triangles_gl {
             glUniform1i(glGetUniformLocation(program_.id(), "is_cw"), is_cw);
         }
 
-        void start_program(const data2render_t& data2render, 
-                           int w_width, int w_height) {
-            count_vertices_ = data2render.vertices_.size();
-            vertex_array_.bind_vertices(data2render.vertices_);
-            shadow_map_.init(program_.id(), data2render.light_, count_vertices_);
-
-            triangles_shaders_.load_shaders(program_.id());
+        void init(const data2render_t& data2render, int w_width, int w_height) {
             glUseProgram(program_.id());
 
             resize(w_width, w_height);
 
             shadow_map_.set_uniform_shadow_map(program_.id());
             shadow_map_.set_uniform_light_direction(program_.id());
+            shadow_map_.set_uniform_depth_bias_MVP(program_.id());
             set_uniform_colors();
         }
 
@@ -74,29 +68,35 @@ namespace triangles_gl {
         }
 
     public:
-        renderer_t(const shaders_pack_t& triangles_shaders,
-                   const shaders_pack_t& shadow_shaders,
+        renderer_t(const std::vector<shader_t>& triangles_shaders,
+            const std::vector<shader_t>& shadow_shaders,
                    const data2render_t& data2render,
                    int w_width, int w_height)
-                   : triangles_shaders_(triangles_shaders), shadow_map_(shadow_shaders) {
-            init_gl();
-            start_program(data2render, w_width, w_height);
+                   : start_time_(std::chrono::high_resolution_clock::now()),
+                     count_vertices_(data2render.vertices_.size()),
+                     program_(triangles_shaders),
+                     shadow_map_(data2render.light_, count_vertices_, shadow_shaders),
+                     vertex_array_(data2render.vertices_) {
+            init(data2render, w_width, w_height);
         }
 
         void render(const glm::highp_mat4& user_perspective,
                     const glm::highp_mat4& user_lookat) const {
 
-            program_.set_uniform_time();
+            set_uniform_time();
             set_uniform_MVP(user_perspective, user_lookat);
-            shadow_map_.set_uniform_depth_bias_MVP(program_.id());
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             render_cw ();
             render_ccw();
         }
 
-        void rebind_scene(const data2render_t& data2render, int w_width, int w_height) {
-            start_program(data2render, w_width, w_height);
+        void rebind(const data2render_t& data2render, int w_width, int w_height) {
+            count_vertices_ = data2render.vertices_.size();
+            shadow_map_.rebind(data2render.light_, count_vertices_);
+            vertex_array_.rebind(data2render.vertices_);
+
+            init(data2render, w_width, w_height);
         }
 
         void resize(int width, int height) const {

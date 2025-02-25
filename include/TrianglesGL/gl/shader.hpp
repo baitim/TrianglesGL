@@ -8,6 +8,21 @@
 #include <utility>
 
 namespace triangles_gl {
+
+    inline void init_gl() {
+        glewExperimental = true;
+        if (glewInit() != GLEW_OK)
+            throw error_t{str_red("Unable to initialize GLEW")};
+
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        glDepthFunc(GL_LESS);
+        glDepthMask(GL_TRUE);
+
+        glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
+    }
+
     class shader_t final {
         std::string shader_code_;
         GLenum shader_type_;
@@ -77,52 +92,6 @@ namespace triangles_gl {
 
         ~shader_t() {
             glDeleteShader(shader_id_);
-        }
-    };
-
-    class shaders_pack_t final {
-        using shaders_container_t = std::vector<std::pair<std::string, GLenum>>;
-        shaders_container_t shaders_;
-
-    private:
-        void process_creation_result(GLuint program_id, GLint result) const {
-            if (result)
-                return;
-
-            std::string error_str = "Error in create shaders program\n";
-            int info_log_length;
-            glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &info_log_length);
-            if (info_log_length > 0) {
-                std::vector<char> error_message(info_log_length + 1);
-                glGetProgramInfoLog(program_id, info_log_length, NULL, &error_message[0]);
-                error_str += &error_message[0];
-            }
-            throw error_t{str_red(error_str)};
-        }
-
-        void delete_attached_shaders(GLuint program_id) {
-            GLsizei max_count = 2;
-            GLsizei count;
-            GLuint  attached_shaders[max_count];
-            glGetAttachedShaders(program_id, max_count, &count, attached_shaders);
-            for (int i = 0; i < count; ++i)
-                glDeleteShader(attached_shaders[i]);
-        }
-
-    public:
-        shaders_pack_t(const shaders_container_t& shaders) : shaders_(shaders) {}
-
-        void load_shaders(GLuint& program_id) {
-            program_id = glCreateProgram();
-            for (int i = 0, end = shaders_.size(); i < end; ++i)
-                glAttachShader(program_id, shader_t{shaders_[i].first, shaders_[i].second}.id());
-            glLinkProgram(program_id);
-
-            GLint result;
-            glGetProgramiv(program_id, GL_LINK_STATUS, &result);
-            process_creation_result(program_id, result);
-
-            delete_attached_shaders(program_id);
         }
     };
 }
