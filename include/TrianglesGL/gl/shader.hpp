@@ -41,6 +41,8 @@ namespace triangles_gl {
                 glGetShaderInfoLog(shader_id_, info_log_length, NULL, &error_message[0]);
                 error_str += &error_message[0];
             }
+
+            glDeleteShader(shader_id_);
             throw error_t{str_red(error_str)};
         }
 

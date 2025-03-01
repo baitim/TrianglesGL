@@ -20,6 +20,9 @@ namespace triangles_gl {
                 glGetProgramInfoLog(program_id, info_log_length, NULL, &error_message[0]);
                 error_str += &error_message[0];
             }
+
+            detach_shaders();
+            glDeleteProgram(program_id_);
             throw error_t{str_red(error_str)};
         }
 
