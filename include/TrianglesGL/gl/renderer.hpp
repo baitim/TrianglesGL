@@ -24,29 +24,28 @@ namespace triangles_gl {
             std::chrono::duration<float> elapsed_seconds = elapsed_time - start_time_;
             float normalized_time = std::fabs(std::sin(1.5f * elapsed_seconds.count()) / 5.f);
             float valid_time      = std::clamp(normalized_time, 0.0f, 0.2f);
-            glUniform1f(glGetUniformLocation(program_.id(), "time"), valid_time);
+            gl_handler(glUniform1f, gl_handler(glGetUniformLocation, program_.id(), "time"), valid_time);
         }
 
         void set_uniform_MVP(const glm::highp_mat4& user_perspective,
                              const glm::highp_mat4& user_lookat) const {
             glm::mat4 model = glm::mat4(1.0f);
             glm::mat4 MVP   = user_perspective * user_lookat * model;
-            glUniformMatrix4fv(glGetUniformLocation(program_.id(), "MVP"),
-                               1, GL_FALSE, &MVP[0][0]);
+            gl_handler(glUniformMatrix4fv, gl_handler(glGetUniformLocation, program_.id(), "MVP"),
+                       1, GL_FALSE, &MVP[0][0]);
         }
 
         void set_uniform_colors() const {
             glm::vec3 colors[2] = {{0.f, 0.f, 1.f}, {1.f, 0.f, 0.f}};
-            glUniform3fv(glGetUniformLocation(program_.id(), "colors"), 2, &colors[0][0]);
+            gl_handler(glUniform3fv, gl_handler(glGetUniformLocation, program_.id(), "colors"), 2, &colors[0][0]);
         }
 
         void set_uniform_is_cw(bool is_cw) const {
-            glUniform1i(glGetUniformLocation(program_.id(), "is_cw"), is_cw);
+            gl_handler(glUniform1i, gl_handler(glGetUniformLocation, program_.id(), "is_cw"), is_cw);
         }
 
         void init(const data2render_t& data2render, int w_width, int w_height) {
-            glUseProgram(program_.id());
-
+            gl_handler(glUseProgram, program_.id());
             resize(w_width, w_height);
 
             shadow_map_.set_uniform_shadow_map(program_.id());
@@ -55,15 +54,15 @@ namespace triangles_gl {
         }
 
         void render_cw() const {
-            glFrontFace(GL_CW);
+            gl_handler(glFrontFace, GL_CW);
             set_uniform_is_cw(true);
-            glDrawArrays(GL_TRIANGLES, 0, count_vertices_);
+            gl_handler(glDrawArrays, GL_TRIANGLES, 0, count_vertices_);
         }
 
         void render_ccw() const {
-            glFrontFace(GL_CCW);
+            gl_handler(glFrontFace, GL_CCW);
             set_uniform_is_cw(false);
-            glDrawArrays(GL_TRIANGLES, 0, count_vertices_);
+            gl_handler(glDrawArrays, GL_TRIANGLES, 0, count_vertices_);
         }
 
     public:
@@ -81,13 +80,12 @@ namespace triangles_gl {
 
         void render(const glm::highp_mat4& user_perspective,
                     const glm::highp_mat4& user_lookat) const {
-
             set_uniform_time();
             set_uniform_MVP(user_perspective, user_lookat);
             shadow_map_.set_uniform_depth_bias_MVP(program_.id());
+            gl_handler(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            render_cw ();
+            render_cw();
             render_ccw();
         }
 
@@ -100,12 +98,12 @@ namespace triangles_gl {
         }
 
         void resize(int width, int height) const {
-            glViewport(0, 0, width, height);
-            glMatrixMode(GL_PROJECTION);
-            glLoadIdentity();
-            glOrtho(0, width, 0, height, -1.0, 1.0);
-            glMatrixMode(GL_MODELVIEW);
-            glLoadIdentity();
+            gl_handler(glViewport, 0, 0, width, height);
+            gl_handler(glMatrixMode, GL_PROJECTION);
+            gl_handler(glLoadIdentity);
+            gl_handler(glOrtho, 0, width, 0, height, -1.0, 1.0);
+            gl_handler(glMatrixMode, GL_MODELVIEW);
+            gl_handler(glLoadIdentity);
         }
     };
 }

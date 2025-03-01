@@ -20,50 +20,50 @@ namespace triangles_gl {
             width_  = width;
             height_ = height;
 
-            glGenTextures(1, &shadow_map_id_);
-            glBindTexture(GL_TEXTURE_2D, shadow_map_id_);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width,
-                         height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            gl_handler(glGenTextures, 1, &shadow_map_id_);
+            gl_handler(glBindTexture, GL_TEXTURE_2D, shadow_map_id_);
+            gl_handler(glTexImage2D, GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width,
+                       height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+            gl_handler(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            gl_handler(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            gl_handler(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            gl_handler(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         }
 
         void set_buffer(GLuint& VBO) const {
-            glGenFramebuffers(1, &VBO);
-            glBindFramebuffer(GL_FRAMEBUFFER, VBO);
-            glDrawBuffer(GL_NONE);
-            glReadBuffer(GL_NONE);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                   GL_TEXTURE_2D, shadow_map_id_, 0);
+            gl_handler(glGenFramebuffers, 1, &VBO);
+            gl_handler(glBindFramebuffer, GL_FRAMEBUFFER, VBO);
+            gl_handler(glDrawBuffer, GL_NONE);
+            gl_handler(glReadBuffer, GL_NONE);
+            gl_handler(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                       GL_TEXTURE_2D, shadow_map_id_, 0);
         }
 
         void set_uniform_depth_MVP(GLuint program_id, const light_t& l) {
             glm::mat4 depth_view_matrix = glm::lookAt(l.light_position, l.light_direction, l.light_up);
             glm::mat4 depth_model_matrix = glm::mat4(1.0);
             depth_MVP_ = l.depth_projection_matrix * depth_view_matrix * depth_model_matrix;
-            glUniformMatrix4fv(glGetUniformLocation(program_id, "depth_MVP"),
-                               1, GL_FALSE, &depth_MVP_[0][0]);
+            gl_handler(glUniformMatrix4fv, glGetUniformLocation(program_id, "depth_MVP"),
+                       1, GL_FALSE, &depth_MVP_[0][0]);
         }
 
         void draw_shadows(const light_t& light, int count_vertices) {
-            glUseProgram(program_.id());
+            gl_handler(glUseProgram, program_.id());
             init_texture(light.width, light.height);
-            
+
             GLuint VBO;
             set_buffer(VBO);
             set_uniform_depth_MVP(program_.id(), light);
 
-            glViewport(0, 0, light.width, light.height);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glDrawArrays(GL_TRIANGLES, 0, count_vertices);
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            glDeleteFramebuffers(1, &VBO);
+            gl_handler(glViewport, 0, 0, light.width, light.height);
+            gl_handler(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            gl_handler(glDrawArrays, GL_TRIANGLES, 0, count_vertices);
+            gl_handler(glBindFramebuffer, GL_FRAMEBUFFER, 0);
+            gl_handler(glDeleteFramebuffers, 1, &VBO);
         }
 
         void clear() {
-            glDeleteTextures(1, &shadow_map_id_);
+            gl_handler(glDeleteTextures, 1, &shadow_map_id_);
         }
 
         void init(const light_t& light, int count_vertices) {
@@ -80,11 +80,10 @@ namespace triangles_gl {
         shadow_map_t(const shadow_map_t& rhs) : program_(rhs.program_),
                                                 depth_MVP_(rhs.depth_MVP_),
                                                 light_direction_(rhs.light_direction_) {
-            glGenTextures(1, &shadow_map_id_);
-            glBindTexture(GL_TEXTURE_2D, shadow_map_id_);
-            glCopyImageSubData(rhs.shadow_map_id_, GL_TEXTURE_2D, 0, 0, 0, 0,
-                               shadow_map_id_, GL_TEXTURE_2D, 0, 0, 0, 0,
-                               rhs.width_, rhs.height_, 1);
+            gl_handler(glGenTextures, 1, &shadow_map_id_);
+            gl_handler(glBindTexture, GL_TEXTURE_2D, shadow_map_id_);
+            gl_handler(glCopyImageSubData, rhs.shadow_map_id_, GL_TEXTURE_2D, 0, 0, 0, 0,
+                       shadow_map_id_, GL_TEXTURE_2D, 0, 0, 0, 0, rhs.width_, rhs.height_, 1);
         }
 
         shadow_map_t& operator=(const shadow_map_t& rhs) {
@@ -115,9 +114,9 @@ namespace triangles_gl {
         }
 
         void set_uniform_shadow_map(GLuint program_id) const {
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, shadow_map_id_);
-            glUniform1i(glGetUniformLocation(program_id, "shadow_map"), 0);
+            gl_handler(glActiveTexture, GL_TEXTURE0);
+            gl_handler(glBindTexture, GL_TEXTURE_2D, shadow_map_id_);
+            gl_handler(glUniform1i, glGetUniformLocation(program_id, "shadow_map"), 0);
         }
 
         void set_uniform_depth_bias_MVP(GLuint program_id) const {
@@ -128,14 +127,14 @@ namespace triangles_gl {
             0.5, 0.5, 0.5, 1.0
             );
             glm::mat4 depth_bias_MVP = bias_matrix * depth_MVP_;
-            glUniformMatrix4fv(glGetUniformLocation(program_id, "depth_bias_MVP"),
-                               1, GL_FALSE, &depth_bias_MVP[0][0]);
+            gl_handler(glUniformMatrix4fv, glGetUniformLocation(program_id, "depth_bias_MVP"),
+                       1, GL_FALSE, &depth_bias_MVP[0][0]);
         }
 
         void set_uniform_light_direction(GLuint program_id) const {
             glm::vec3 light_dir = glm::normalize(light_direction_);
-            glUniform3f(glGetUniformLocation(program_id, "light_dir"),
-                        light_dir.x, light_dir.y, light_dir.z);
+            gl_handler(glUniform3f, glGetUniformLocation(program_id, "light_dir"),
+                       light_dir.x, light_dir.y, light_dir.z);
         }
 
         ~shadow_map_t() {
