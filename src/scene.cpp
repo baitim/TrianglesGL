@@ -13,20 +13,15 @@ int main(int argc, char* argv[]) {
     int w_width  = 800;
     int w_height = 600;
     window_t window(sf::VideoMode(w_width, w_height), "Triangles");
-    
-    std::filesystem::path dir;
-    #ifdef CMAKE_BINARY_DIR
-        dir = CMAKE_BINARY_DIR;
-    #else
-        return (std::cout << print_red("CMAKE_BINARY_DIR not defined!\n"), 1);
-    #endif
 
+    std::filesystem::path exe_path(argv[0]);
+    std::string dir = exe_path.parent_path().string() + "/";
     try {
         init_gl();
         std::vector<scene_t<float>> scenes;
-        scenes = get_scenes(argc, argv, dir / "scenes_in");
+        scenes = get_scenes(argc, argv, dir + "scenes_in");
 
-        std::string path2shaders = dir / "shaders/";
+        std::string path2shaders = dir + "shaders/";
         std::vector<shader_t> triangles_shaders{{path2shaders + "triangles.vs", GL_VERTEX_SHADER},
                                                 {path2shaders + "triangles.fs", GL_FRAGMENT_SHADER}};
         std::vector<shader_t> shadow_shaders{{path2shaders + "shadow_map.vs", GL_VERTEX_SHADER},

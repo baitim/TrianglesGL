@@ -27,6 +27,6 @@ namespace triangles_gl {
             input_file.close();
             return sstr.str();
         }
-        throw error_t{"Can't open file"};
+        throw error_t{"Can't open file: " + std::string(file_name)};
     }
 }
