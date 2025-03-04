@@ -8,6 +8,18 @@ namespace triangles_gl {
         GLuint VAO_ = 0;
         GLuint VBO_ = 0;
 
+        struct VAO_guard_deleter {
+            void operator()(GLuint* ptr_VAO) const {
+                glDeleteVertexArrays(1, ptr_VAO);
+            }
+        };
+
+        struct VBO_guard_deleter {
+            void operator()(GLuint* ptr_VBO) const {
+                glDeleteBuffers(1, ptr_VBO);
+            }
+        };
+
     private:
         void clear() {
             gl_handler(glDeleteVertexArrays, 1, &VAO_);
@@ -17,7 +29,7 @@ namespace triangles_gl {
         void bind_VAO_VBO() {
             gl_handler(glGenVertexArrays, 1, &VAO_);
             gl_handler(glGenBuffers, 1, &VBO_);
-            
+
             gl_handler(glBindVertexArray, VAO_);
             gl_handler(glBindBuffer, GL_ARRAY_BUFFER, VBO_);
         }
@@ -50,7 +62,11 @@ namespace triangles_gl {
 
     public:
         vertex_array_t(const std::vector<vertex2render_t>& vertices) {
+            std::unique_ptr<GLuint, VAO_guard_deleter> VAO_guard(&VAO_);
+            std::unique_ptr<GLuint, VBO_guard_deleter> VBO_guard(&VBO_);
             init(vertices);
+            VAO_guard.release();
+            VBO_guard.release();
         }
 
         vertex_array_t(const vertex_array_t& rhs) {

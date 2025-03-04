@@ -15,6 +15,12 @@ namespace triangles_gl {
         glm::mat4 depth_MVP_;
         glm::vec3 light_direction_;
 
+        struct texture_guard_deleter {
+            void operator()(GLuint* ptr_texture) const {
+                glDeleteTextures(1, ptr_texture);
+            }
+        };
+
     private:
         void init_texture(int width, int height) {
             width_  = width;
@@ -74,7 +80,9 @@ namespace triangles_gl {
     public:
         shadow_map_t(const light_t& light, int count_vertices, const std::vector<shader_t>& shaders)
             : program_(shaders) {
+            std::unique_ptr<GLuint, texture_guard_deleter> texture_guard(&shadow_map_id_);
             init(light, count_vertices);
+            texture_guard.release();
         }
 
         shadow_map_t(const shadow_map_t& rhs) : program_(rhs.program_),

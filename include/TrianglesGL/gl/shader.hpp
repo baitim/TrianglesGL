@@ -5,12 +5,19 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <memory>
 
 namespace triangles_gl {
     class shader_t final {
         std::string shader_code_;
         GLenum shader_type_;
         GLuint shader_id_;
+
+        struct shader_guard_deleter {
+            void operator()(GLuint* ptr_shader) const {
+                glDeleteShader(*ptr_shader);
+            }
+        };
 
     private:
         void process_installation_result(GLint result) const {
@@ -45,13 +52,18 @@ namespace triangles_gl {
         shader_t(const std::string& file_path, GLenum shader_type)
         : shader_code_(file2str(file_path)), shader_type_(shader_type) {
             shader_id_ = gl_handler(glCreateShader, shader_type_);
+            std::unique_ptr<GLuint, shader_guard_deleter> shader_guard(&shader_id_);
             install();
+            shader_guard.release();
         }
 
         shader_t(const shader_t& rhs) : shader_code_(rhs.shader_code_),
                                         shader_type_(rhs.shader_type_),
                                         shader_id_(gl_handler(glCreateShader, rhs.shader_type_)) {
+
+            std::unique_ptr<GLuint, shader_guard_deleter> shader_guard(&shader_id_);
             install();
+            shader_guard.release();
         }
 
         shader_t& operator=(const shader_t& rhs) {

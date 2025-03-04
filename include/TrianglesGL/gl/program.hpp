@@ -7,6 +7,12 @@ namespace triangles_gl {
         GLuint program_id_;
         std::vector<shader_t> shaders_;
 
+        struct program_guard_deleter {
+            void operator()(GLuint* ptr_program) const {
+                glDeleteProgram(*ptr_program);
+            }
+        };
+
     private:
         static void detach_shaders(GLuint program_id) {
             GLsizei max_count = 2;
@@ -38,6 +44,8 @@ namespace triangles_gl {
     public:
         program_t(std::vector<shader_t> shaders) : shaders_(shaders) {
             program_id_ = gl_handler(glCreateProgram);
+            std::unique_ptr<GLuint, program_guard_deleter> program_guard(&program_id_);
+
             for (auto shader : shaders_)
                 gl_handler(glAttachShader, program_id_, shader.id());
             gl_handler(glLinkProgram, program_id_);
@@ -45,6 +53,8 @@ namespace triangles_gl {
             GLint result;
             gl_handler(glGetProgramiv, program_id_, GL_LINK_STATUS, &result);
             process_creation_result(program_id_, result);
+
+            program_guard.release();
         }
 
         program_t(const program_t& rhs) : program_t(rhs.shaders_) {}
