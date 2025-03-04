@@ -138,7 +138,7 @@ namespace triangles_gl {
         }
 
         ~shadow_map_t() {
-            clear();
+            glDeleteTextures(1, &shadow_map_id_);
         }
     };
 }

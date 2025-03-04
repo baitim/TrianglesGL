@@ -92,7 +92,8 @@ namespace triangles_gl {
         }
 
         ~vertex_array_t() {
-            clear();
+            glDeleteVertexArrays(1, &VAO_);
+            glDeleteBuffers(1, &VBO_);
         }
     };
 }

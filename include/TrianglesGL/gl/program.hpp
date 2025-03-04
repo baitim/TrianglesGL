@@ -71,7 +71,7 @@ namespace triangles_gl {
 
         ~program_t() {
             detach_shaders(program_id_);
-            gl_handler(glDeleteProgram, program_id_);
+            glDeleteProgram(program_id_);
         }
     };
 }

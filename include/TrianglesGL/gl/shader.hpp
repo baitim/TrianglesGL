@@ -77,7 +77,7 @@ namespace triangles_gl {
         GLuint id() const noexcept { return shader_id_; }
 
         ~shader_t() {
-            gl_handler(glDeleteShader, shader_id_);
+            glDeleteShader(shader_id_);
         }
     };
 }
