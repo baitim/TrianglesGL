@@ -2,16 +2,19 @@
 
 #include "TrianglesGL/common.hpp"
 #include <GL/glew.h>
+#include <functional>
 
 namespace triangles_gl {
     inline void check_gl_error(std::string_view func_name, const char* file, const char* callerFunction) {
         GLenum error = glGetError();
         if (error != GL_NO_ERROR) {
-            throw error_t{str_red(
-              "OpenGL error in " + std::string(func_name)
-            + " called from " + callerFunction + " in " + file + "\n"
-            + "OpenGL error code: " + std::to_string(error)
-            )};
+            std::stringstream ss;
+            ss << "OpenGL error in " << func_name
+               << " called from " << callerFunction
+               << " in " << file << "\n"
+               << "OpenGL error code: " << error;
+
+            throw error_t{str_red(ss.str())};
         }
     }
 
@@ -20,12 +23,12 @@ namespace triangles_gl {
     template <typename Func, typename... Args>
     inline auto gl_handler_(Func func, std::string_view func_name, const char* file,
                             const char* caller_func, Args&&... args)
-                            -> decltype(func(std::forward<Args>(args)...)) {
+                            -> std::invoke_result_t<Func, Args...> {
         if constexpr(std::is_void_v<decltype(func(std::forward<Args>(args)...))>) {
-            func(std::forward<Args>(args)...);
+            std::invoke(func, std::forward<Args>(args)...);
             check_gl_error(func_name, file, caller_func);
         } else {
-            auto result = func(std::forward<Args>(args)...);
+            auto result = std::invoke(func, std::forward<Args>(args)...);
             check_gl_error(func_name, file, caller_func);
             return result;
         }
