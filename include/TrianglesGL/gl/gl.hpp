@@ -5,12 +5,12 @@
 #include <functional>
 
 namespace triangles_gl {
-    inline void check_gl_error(std::string_view func_name, const char* file, const char* callerFunction) {
+    inline void check_gl_error(std::string_view func_name, const char* file, const char* caller_func) {
         GLenum error = glGetError();
         if (error != GL_NO_ERROR) {
             std::stringstream ss;
             ss << "OpenGL error in " << func_name
-               << " called from " << callerFunction
+               << " called from " << caller_func
                << " in " << file << "\n"
                << "OpenGL error code: " << error;
 
